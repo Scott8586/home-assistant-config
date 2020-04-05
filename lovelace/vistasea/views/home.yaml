@@ -1,0 +1,58 @@
+title: Vistasea
+path: default_view
+theme: default
+badges:
+  - entity: person.scott
+  - entity: person.stephanie
+  - entity: device_tracker.explorer_bt
+  - entity: device_tracker.rav4_bt
+  - entity: device_tracker.audi_bt
+cards:
+  - entity: sensor.time
+    type: 'custom:bignumber-card'
+  - entity: weather.dark_sky
+    theme: default
+    type: weather-forecast
+  - entity: camera.vs_front_yard
+    type: picture-entity
+  - entity: climate.main_floor
+    type: thermostat
+  - entities:
+      - entity: sensor.bme680_sensor_temperature
+      - entity: sensor.bme680_sensor_humidity
+      - entity: sensor.bme680_sensor_sealevel_pressure
+      - entity: sensor.bme680_sensor_air_quality
+    title: Environment
+    type: entities
+  - entities:
+      - cover.hvw_main_door
+      - cover.hvw_side_door
+      - cover.vs_front_door_1
+      - cover.vs_front_door_2
+      - cover.vs_rear_door
+    title: Cover
+    type: entities
+  - entities:
+      - device_tracker.scotts_iphone
+      - sensor.scott_s_iphone_battery_state
+      - sensor.scott_s_iphone_battery_level
+      - device_tracker.scotts_iphone_bt
+      - device_tracker.scotts_g645_bt
+      - device_tracker.scotts_ipad2
+      - device_tracker.scotts_personal_mbp
+      - device_tracker.scotts_work_mbp2
+      - device_tracker.stephs_iphone
+      - device_tracker.stephs_iphone_bt
+      - device_tracker.stephs_apple_watch
+      - device_tracker.stephs_apwa_bt
+      - device_tracker.stephs_ipad2
+      - device_tracker.nancys_ipad
+    title: Personal Devices
+    type: entities
+  - entities:
+      - sensor.rav4
+      - sensor.explorer
+      - sensor.audi
+    title: Cars
+    type: entities
+

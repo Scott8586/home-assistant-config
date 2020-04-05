@@ -1,0 +1,58 @@
+person.scott:
+  entity_picture: '"https://www.gravatar.com/avatar/7ef327c7d17eb7c2466bbd613db99884.jpg?s=80&d=wavatar"'
+person.stephanie:
+  entity_picture: '"https://www.gravatar.com/avatar/608e3038b8dd7098729f71371af81d14.jpg?s=80&d=wavatar"'
+binary_sensor.netgear_lte_mobile_connected:
+  friendly_name: Netgear LTE Modem
+sensor.netgear_lte_connection_text:
+  friendly_name: Connection Type
+sensor.netgear_lte_current_band:
+  friendly_name: Current Band
+sensor.netgear_lte_radio_quality:
+  friendly_name: Radio Quality
+sensor.netgear_lte_usage:
+  friendly_name: Data Usage
+sensor.netgear_lte_tx_level:
+  friendly_name: TX Level
+sensor.netgear_lte_rx_level:
+  friendly_name: RX Level
+sensor.memory_use_percent:
+  friendly_name: Memory use
+sensor.load_1m:
+  hidden: true
+sensor.upstairs_ups_battery_runtime:
+  hidden: true
+sensor.bme680_sensor_temperature:
+  icon: mdi:thermometer
+  friendly_name: Temperature
+sensor.bme680_sensor_humidity:
+  icon: mdi:water
+  friendly_name: Humidity
+  device_class: humidity
+  unit_of_measurement: "%"
+sensor.bme680_sensor_pressure:
+  icon: mdi:gauge
+  friendly_name: Pressure
+sensor.bme680_sensor_air_quality:
+  icon: mdi:blur
+  friendly_name: Air Quality
+  device_class: pm25
+  unit_of_measurement: "%"
+weather.dark_sky:
+  friendly_name: 'Dark Sky: Grapeview'
+device_tracker.scotts_ipad_bt:
+  hidden: true
+  source_type: bluetooth
+device_tracker.scotts_iphone_bt:
+  hidden: true
+  source_type: bluetooth
+device_tracker.stephs_ipad_bt:
+  hidden: true
+  source_type: bluetooth
+device_tracker.stephs_iphone_bt:
+  hidden: true
+  source_type: bluetooth
+device_tracker.srp_owntracks:
+  hidden: true
+device_tracker.srp_iphone_ios:
+  hidden: true

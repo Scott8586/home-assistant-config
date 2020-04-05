@@ -1,0 +1,208 @@
+# UPS Shutdown
+- alias: "UPS based shutdown"
+  initial_state: 'off'
+  trigger:
+    platform: numeric_state
+    entity_id: sensor.basement_ups_battery_runtime
+    below: 600
+  action:
+    - service: notify.telegram_vistasea
+      data:
+        message: "Home Assistant UPS shutdown"
+    - service: hassio.host_shutdown
+
+- alias: Daily Backup at 4 AM
+  trigger:
+    platform: time
+    at: '04:00:00'
+  action:
+  - service: hassio.addon_start
+    data:
+      addon: 0844df1a_remote_backup
+  - service: notify.telegram_vistasea
+    data:
+      message: "Home Assistant backed up"
+
+- alias: "Cycle Modem Connection"
+  trigger: []
+  condition: []
+  action:
+    - service: netgear_lte.set_option
+      data:
+        autoconnect: never
+    - delay: 00:01:00
+    - service: netgear_lte.set_option
+      data:
+        autoconnect: home
+
+# Daily/Periodic temperature report
+#- alias: 'Daily report of outside temp at 5am'
+#  trigger:
+#    platform: time
+#    at: '05:30:00'
+#  action:
+#    service: notify.telegram_vistasea # or telegram_bot.send_message
+#    data_template:
+#      message: "Outside Temperature {{ states('sensor.weewx_outside_temperature') }}F"
+    
+# Start actions
+- id: 'startactions'
+  alias: 'Start Actions'
+  trigger:
+    event: start
+    platform: homeassistant
+  condition: []
+  action:
+    # Send a telegram 
+    - service: notify.telegram_vistasea
+      data:
+        message: "Home Assistant (re)started"
+    - delay: 00:00:05
+    # Restart the monitor services
+    - service: mqtt.publish
+      data:
+        topic: "monitor/scan/restart"
+        payload: ""
+
+# Technology/Band connection change - 3G or LTE
+- id: 'cellradiobandchange'
+  alias: 'Cell Radio Band Change'
+  trigger:
+    platform: state
+    entity_id: sensor.netgear_lte_connection_text
+  action:     
+    service: notify.telegram_vistasea
+    data_template:
+      message: "{{ trigger.to_state.name }} is {{ trigger.to_state.state }}"
+
+# zone change
+- id: 'zonechange'
+  alias: 'name entered zone'
+  trigger:
+    platform: state
+    entity_id: device_tracker.scotts_iphone, device_tracker.stephs_iphone, device_tracker.stephs_apple_watch, device_tracker.scotts_iphone_bt, device_tracker.stephs_iphone_bt, device_tracker.scotts_g645_bt, device_tracker.stephs_apwa_bt, device_tracker.explorer_bt, device_tracker.audi_bt, device_tracker.rav4_bt
+    from: 'not_home'
+  action:     
+    service: notify.telegram_vistasea
+    data_template:
+      message: "z: {{ trigger.to_state.name }} appears {{ trigger.to_state.state }}"
+
+# zone change
+- id: 'awaychange'
+  alias: name leaving zone
+  trigger:
+    platform: state
+    entity_id: device_tracker.scotts_iphone, device_tracker.stephs_iphone, device_tracker.stephs_apple_watch, device_tracker.scotts_iphone_bt, device_tracker.stephs_iphone_bt, device_tracker.scotts_g645_bt, device_tracker.stephs_apwa_bt, device_tracker.explorer_bt, device_tracker.audi_bt, device_tracker.rav4_bt
+    to: 'not_home'
+  action:     
+    service: notify.telegram_vistasea
+    data_template:
+      message: "z: {{ trigger.to_state.name }} appears Away"
+
+# Test message      
+- id: 'testmessage'
+  alias: "Telegram Test command"
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/ping'
+  action:
+    service: notify.telegram_vistasea
+    data:
+      message: "pong"
+
+# Relink message
+- id: 'relinkmessage'
+  alias: "Cycle Modem Link Command"
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/relink'
+  action:
+    - service: notify.telegram_vistasea
+      data:
+        message: "Relinking, takes 60s or more..."
+    - service: netgear_lte.set_option
+      data:
+        autoconnect: never
+    - delay: 00:01:00
+    - service: netgear_lte.set_option
+      data:
+        autoconnect: home
+
+# Reload message      
+- id: 'reloadmessage'
+  alias: "Home Assistant Reload command"
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/reload'
+  action:
+    - service: notify.telegram_vistasea
+      data:
+        message: "Reloading..."
+    - service: frontend.reload_themes
+      
+# Restart message      
+- id: 'restartmessage'
+  alias: "Home Assistant Restart command"
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/restart'
+  action:
+    - service: notify.telegram_vistasea
+      data:
+        message: "Restarting..."
+    - service: homeassistant.restart
+    
+# Reboot message      
+- id: 'rebootmessage'       
+  alias: "Home Assistant Reboot command"
+  trigger:                  
+    platform: event         
+    event_type: telegram_command
+    event_data:             
+      command: '/reboot'    
+  action:                   
+    - service: notify.telegram_vistasea
+      data:                 
+        message: "Rebooting..."
+    - service: hassio.host_reboot
+                            
+# motion sensor
+- id: 'vistaseamotion'
+  alias: Vistasea Motion Sensor
+  trigger:
+    platform: state
+    entity_id: binary_sensor.vistasea_motion
+    from: 'off'
+  action:
+    service: notify.telegram_vistasea
+    data_template:
+      message: "{{ trigger.to_state.name }} is active"
+
+# - id: 'autothemechange'
+#   alias: Automatic Theme Change
+#   trigger:
+#     - platform: homeassistant
+#       event: start
+#     - platform: sun
+#       event: sunrise
+#       offset: "00:15:00"
+#     - platform: sun
+#       event: sunset
+#       offset: "00:15:00"
+#   action:
+#     - service_template: frontend.set_theme
+#       data_template:
+#         name: >
+#           {% if states.sun.sun.state == "above_horizon" %}
+#             teal
+#           {% else %}
+#             dark_blue
+#           {% endif %}

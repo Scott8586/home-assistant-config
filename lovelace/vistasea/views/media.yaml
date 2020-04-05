@@ -1,0 +1,16 @@
+#title: Media
+icon: mdi:library-music
+path: media
+theme: default
+badges: []
+cards:
+  - entity: media_player.living_room
+    type: media-control
+  - entity: media_player.kitchen
+    type: media-control
+  - entity: media_player.dining_room
+    type: media-control
+  - entity: media_player.patio
+    type: media-control
+  - entity: media_player.den
+    type: media-control

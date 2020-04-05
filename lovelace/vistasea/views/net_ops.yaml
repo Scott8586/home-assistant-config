@@ -1,0 +1,92 @@
+#title: Net Ops
+icon: mdi:lan
+path: net-ops
+theme: default
+badges:
+  - entity: binary_sensor.updater
+cards:
+  - entities:
+      - entity: sensor.load_1m_templated
+      - entity: sensor.cpu_temperature
+      - entity: sensor.memory_use_percent
+      - entity: sensor.processor_use
+      - entity: sensor.last_boot
+    title: Local Machine
+    type: entities
+  - entities:
+      - sensor.upstairs_ups_status
+      - sensor.upstairs_ups_load
+      - sensor.upstairs_ups_input_voltage
+      - sensor.upstairs_ups_battery_minutes
+    title: Network Operations
+    type: entities
+  - entities:
+      - automation.telegram_test_command
+    show_header_toggle: false
+    theme: default
+    title: Test Messages
+    type: entities
+  - title: Host Control
+    show_name: true
+    show_state: true
+    type: glance
+    entities:
+      - entity: sensor.netgear_lte_current_band
+        name: Radio Link
+        icon 'mdi: restart'
+        tap_action:
+          action: call-service
+          service: automation.trigger
+          service_data:
+            entity_id: automation.cycle_modem_link_command
+      - entity: sensor.uptime
+        name: Lovelace UI
+        icon: 'mdi:restart'
+        tap_action:
+          action: call-service
+          service: automation.trigger
+          service_data:
+            entity_id: automation.home_assistant_reload_command
+      - entity: sensor.uptime
+        icon: 'mdi:restart'
+        name: Home Assistant
+        tap_action:         
+          action: call-service
+          service: automation.trigger
+          service_data:     
+            entity_id: automation.home_assistant_restart_command
+      - entity: sensor.last_boot
+        icon: 'mdi:restart' 
+        name: HA Server     
+        tap_action:         
+          action: call-service
+          service: automation.trigger
+          service_data:     
+            entity_id: automation.home_assistant_reboot_command
+  - title: Cycle Modem Connection                 
+    type: entities                                
+    theme: default                                
+    entities:                                     
+      - automation.cycle_modem_connection         
+  - entities:                                     
+      - entity: sensor.netgear_lte_connection_text
+      - entity: sensor.netgear_lte_current_band   
+      - entity: sensor.netgear_lte_radio_quality  
+      - entity: sensor.netgear_lte_tx_level       
+      - entity: sensor.netgear_lte_rx_level       
+      - entity: sensor.netgear_lte_usage          
+    title: LB1120 LTE Modem                       
+    type: entities                                        
+  - title: Vistasea Pi-hole
+    type: entities
+    entities:
+        - entity: switch.vistasea_pi_hole
+          name: Pi-hole operation
+        - entity: sensor.vistasea_pi_hole_ads_percentage_blocked_today
+          name: Percentage ads blocked today
+          type: "custom:secondaryinfo-entity-row"
+          secondary_info: "[[ sensor.vistasea_pi_hole_dns_unique_clients ]] unique clients"
+        - entity: sensor.vistasea_pi_hole_dns_queries_today
+          name: Number of DNS requests today
+          type: "custom:secondaryinfo-entity-row"
+          secondary_info: "[[ sensor.vistasea_dns_query_rate ]] queries per min"

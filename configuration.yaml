@@ -1,0 +1,280 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Vistasea
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret vistasea_latitude
+  longitude: !secret vistasea_longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 15
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/Los_Angeles
+  # Customization file
+  customize: !include customize.yaml
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+# http:
+#   base_url: example.duckdns.org:8123
+
+netgear_lte:
+  - host: !secret lte_modem_host
+    password: !secret lte_modem_pass
+    #scan_interval: 60
+    sensor:
+      monitored_conditions:
+      - usage
+      - connection_text
+      - radio_quality
+      - rx_level
+      - tx_level
+      - current_band
+
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_apikey
+    parse_mode: html # otherwise '_' are interpreted as for italics in msg parser
+    allowed_chat_ids:
+      - !secret telegram_chatid
+      - !secret telegram_userid
+
+notify:
+  - name: telegram_vistasea
+    platform: telegram
+    api_key: !secret telegram_apikey
+    chat_id: !secret telegram_chatid #first chat Group "HA Vistasea"
+    
+device_tracker:
+  - platform: mqtt
+    devices:
+      scotts_iphone_bt: 'monitor/vistasea_living/scotts_iphone_bt/device_tracker'
+      stephs_iphone_bt: 'monitor/vistasea_living/stephs_iphone_bt/device_tracker'
+#      scotts_ipad_bt: 'monitor/vistasea_living/scotts_ipad_bt/device_tracker'
+#      stephs_ipad_bt: 'monitor/vistasea_living/stephs_ipad_bt/device_tracker'
+      scotts_g645_bt: 'monitor/vistasea_living/scotts_g645_bt/device_tracker'
+      stephs_apwa_bt: 'monitor/vistasea_living/stephs_apwa_bt/device_tracker'
+      explorer_bt: 'monitor/vistasea_garage/explorer/device_tracker'
+      audi_bt: 'monitor/vistasea_garage/audi/device_tracker'
+      rav4_bt: 'monitor/vistasea_garage/rav4/device_tracker'
+  - platform: mqtt_json
+    devices:
+      srp_iphone_ios: 'location/phone/srp_iphone_ios'
+
+
+logger:
+  default: info
+  logs:
+    homeassistant.components.automation: debug
+#    aiounifi: debug
+#    homeassistant.components.unifi: debug
+
+pi_hole:
+  - host: !secret vistasea_pihole_host
+    name: Vistasea Pi-hole
+
+cover:
+    - platform: myq
+      username: !secret myq_user
+      password: !secret myq_pass
+      type: liftmaster
+      
+camera:
+  - platform: uvc
+    nvr: !secret uvc_host
+    # port: 7443
+    key: !secret uvc_key
+    password: !secret uvc_pass
+    ssl: false
+
+# Discover some devices automatically
+discovery:
+
+climate:
+  - platform: venstar
+    host: !secret venstar_main_host
+    ssl: false
+    humidifier: false
+
+# Sensors
+sensor:
+  - platform: bme680
+    i2c_address: 0x77
+  - platform: mqtt
+    state_topic: 'monitor/vistasea_garage/audi'
+    value_template: '{{ value_json.rssi }}'
+    unit_of_measurement: 'dBm'
+    name: 'Audi'
+  - platform: mqtt
+    state_topic: 'monitor/vistasea_garage/explorer'
+    value_template: '{{ value_json.rssi }}'
+    unit_of_measurement: 'dBm'
+    name: 'Explorer'
+  - platform: mqtt
+    state_topic: 'monitor/vistasea_garage/rav4'
+    value_template: '{{ value_json.rssi }}'
+    unit_of_measurement: 'dBm'
+    name: 'Rav4'
+  # Weewx Weather
+  - platform: rest
+    resource: http://192.168.32.157/weewx/daily.json
+    name: Weewx Weather
+    scan_interval: 150
+    force_update: true
+    json_attributes:
+      - current
+      - almanac
+    value_template: '{{ value_json.location }}'
+  - platform: nut
+    name: Upstairs UPS
+    host: !secret ups_host
+    port: 3493
+    alias: ups
+    username: !secret ups_user
+    password: !secret ups_pass
+    resources:
+      - ups.load
+#      - ups.realpower.nominal
+      - input.voltage
+      - battery.runtime
+      - ups.status.display
+  # Local System monitor
+  - platform: systemmonitor
+    resources:
+      - type: memory_use_percent
+      - type: processor_use
+      - type: load_1m
+      - type: last_boot
+  # Template      
+  - platform: template
+    sensors:
+      upstairs_ups_battery_minutes:
+        friendly_name: "Upstairs UPS Battery Minutes"
+        entity_id:
+          - sensor.upstairs_ups_battery_runtime
+        value_template: "{{ ((states('sensor.upstairs_ups_battery_runtime')) | float / 60) | round(0) }}"
+        unit_of_measurement: "min"
+      load_1m_templated:
+        friendly_name: "CPU Load (1m)"
+        icon_template: mdi:memory
+        value_template: "{{ states('sensor.load_1m') | float | round(2) }}"
+      weewx_outside_temperature:
+        friendly_name: Outside Temperature
+        entity_id:
+          - sensor.weewx_weather
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['outTemp'] }}"
+        unit_of_measurement: '°F'
+      weewx_inside_temperature:
+        friendly_name: Inside Temperature
+        entity_id:
+          - sensor.weewx_weather
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['insideTemp'] }}"
+        unit_of_measurement: '°F'
+      weewx_outside_humidity:
+        friendly_name: Outside Humidity
+        entity_id:
+          - sensor.weewx_weather
+        icon_template: mdi:water-percent
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['humidity'] }}"
+        unit_of_measurement: '%'
+      weewx_inside_humidity:
+        friendly_name: Inside Humidity
+        entity_id:
+          - sensor.weewx_weather
+        icon_template: mdi:water-percent
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['insideHumidity'] }}"
+        unit_of_measurement: '%'
+      weewx_wind_speed:
+        friendly_name: Wind Speed
+        entity_id:
+          - sensor.weewx_weather
+        icon_template: mdi:weather-windy 
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['windSpeed'] }}"
+        unit_of_measurement: 'mph'
+      weewx_wind_direction_ordinal:
+        friendly_name: Wind Direction
+        entity_id:
+          - sensor.weewx_weather
+        icon_template: mdi:weather-windy
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['windDirText'] }}"
+      weewx_solar_altitude:
+        friendly_name: Solar Altitude
+        entity_id:
+          - sensor.weewx_weather
+        value_template: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
+        unit_of_measurement: '°'
+      # http://www.csgnetwork.com/barcorrecthcalc.html - vistasea correction 1.1
+      bme680_sensor_sealevel_pressure:
+        friendly_name: Sealevel Pressure
+        entity_id:
+          - sensor.bme680_sensor_pressure
+        icon_template: mdi:gauge
+        value_template: "{{ ((states('sensor.bme680_sensor_pressure')) | float + 1.1) | round(1) }}"
+        unit_of_measurement: 'mb'
+      vistasea_dns_query_rate:
+        friendly_name: DNS Query Rate
+        value_template: "{{ ((state_attr('sensor.vistasea_pi_hole_dns_queries_today_statistics','average_change')) | float * 2) }}"
+        unit_of_measurement: 'queries per min'
+#  - platform: noaa_tides
+#    station_id: 9446489
+ # CPU Temperature of pi
+  - platform: command_line
+    name: CPU Temperature
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    value_template: "{{ value | multiply(0.001) | float | round(1) }} °C"
+#    value_template: "{{ (value | multiply(0.0018) + 32) | float | round(2) }} °F"
+#    unit_of_measurement: "°C" # unit of measurement is for knowing the incoming units, not for units presentation
+  - platform: statistics
+    name: vistasea_pi_hole_dns_queries_today_statistics
+    entity_id: sensor.vistasea_pi_hole_dns_queries_today
+# Time and date
+  - platform: uptime
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'date_time_utc'
+      - 'date_time_iso'
+      - 'time_date'
+      - 'time_utc'
+# Add the moon
+  - platform: moon
+
+switch:
+  - platform: command_line
+    switches:
+      vistasea_pi_hole:
+        command_on: !secret vistasea_pihole_enable 
+        command_off: !secret vistasea_pihole_disable
+        command_state: !secret vistasea_pihole_status
+        value_template: "{{ value_json.status == 'enabled' }}"
+
+# NWS weather
+#weather:
+#  - platform: nws
+#    mode: hourly # default daynight
+#    api_key: srp@tworoads.net
+weather:
+  - platform: darksky
+    api_key: !secret darksky_api
+    mode: daily
+    scan_interval:
+      minutes: 15
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+lovelace:
+  mode: yaml
+
+history: !include history.yaml
+recorder: !include recorder.yaml
+#group: !include groups.yaml
+zone: !include zones.yaml
+binary_sensor: !include binary_sensors.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml

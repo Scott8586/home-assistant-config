@@ -9,9 +9,14 @@ resources:
     type: module
   - url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js?=0.0.2
     type: module
+  - url: /hacsfiles/flex-horseshoe-card/flex-horseshoe-card.js?v=0.0.2
+    type: module
+  - url: /local/vertical-style-card.js?v=0.1
+    type: js
 title: Vistasea
 views:
   - !include /config/lovelace/vistasea/views/home.yaml
   - !include /config/lovelace/vistasea/views/weather.yaml
   - !include /config/lovelace/vistasea/views/media.yaml
   - !include /config/lovelace/vistasea/views/net_ops.yaml
+  - !include /config/lovelace/vistasea/views/sensors.yaml

@@ -2,7 +2,7 @@
 
 ## Configuration for Home Assistant at Vistasea Cabin.
 
-This is Home assistant on a Raspberry Pi 3B+, with a directly connected (BME680 sensor)[https://learn.adafruit.com/adafruit-bme680-humidity-temperature-barometic-pressure-voc-gas/overview].
+This is Home assistant on a Raspberry Pi 3B+, with a directly connected [BME680 sensor[(https://learn.adafruit.com/adafruit-bme680-humidity-temperature-barometic-pressure-voc-gas/overview).
 
 Integrations include
 - Netgear LTE modem - our connection to the internet

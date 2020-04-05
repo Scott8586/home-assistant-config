@@ -1,0 +1,11 @@
+title: Sensors
+icon: mdi:thermometer-lines
+path: sensors
+cards:
+  - entities:
+      - entity: sensor.bme680_sensor_temperature
+      - entity: sensor.bme680_sensor_humidity
+      - entity: sensor.bme680_sensor_sealevel_pressure
+      - entity: sensor.bme680_sensor_air_quality
+    title: Loft BME680
+    type: entities

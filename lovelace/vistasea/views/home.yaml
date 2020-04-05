@@ -172,10 +172,10 @@ cards:
     type: entities
   - entities:
       - device_tracker.scotts_iphone
-      - sensor.scott_s_iphone_battery_state
-      - sensor.scott_s_iphone_battery_level
+#      - sensor.scott_s_iphone_battery_state
+#      - sensor.scott_s_iphone_battery_level
       - device_tracker.scotts_iphone_bt
-      - device_tracker.scotts_g645_bt
+#      - device_tracker.scotts_g645_bt
       - device_tracker.scotts_ipad2
       - device_tracker.scotts_personal_mbp
       - device_tracker.scotts_work_mbp2

@@ -15,3 +15,11 @@ Integrations include
 - [Weewx](https://github.com/weewx/weewx) Weather software powered by a Davis Vantage Pro2
 - Two satellite Pi Zero W which use the [monitor script](https://github.com/andrewjfreyer/monitor) to track blutetooth devices
 
+Home/Main Page:
+
+[](images/home_page.png)
+
+Net Ops Page:
+
+[](images/net_ops.png)
+

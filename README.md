@@ -17,9 +17,9 @@ Integrations include
 
 Home/Main Page:
 
-[](images/home_page.png)
+![](images/home_page.png)
 
 Net Ops Page:
 
-[](images/net_ops.png)
+![](images/net_ops.png)
 

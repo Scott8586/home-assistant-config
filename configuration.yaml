@@ -41,6 +41,12 @@ telegram_bot:
       - !secret telegram_chatid
       - !secret telegram_userid
 
+unifiprotect:
+  host: !secret protect_host
+  username: !secret protect_user
+  password: !secret protect_pass
+  minimum_score: 50
+
 notify:
   - name: telegram_vistasea
     platform: telegram
@@ -83,12 +89,7 @@ cover:
       type: liftmaster
       
 camera:
-  - platform: uvc
-    nvr: !secret uvc_host
-    # port: 7443
-    key: !secret uvc_key
-    password: !secret uvc_pass
-    ssl: false
+  - platform: unifiprotect
 
 # Discover some devices automatically
 discovery:
@@ -103,6 +104,7 @@ climate:
 sensor:
   - platform: bme680
     i2c_address: 0x77
+  - platform: unifiprotect
   - platform: mqtt
     state_topic: 'monitor/vistasea_garage/audi'
     value_template: '{{ value_json.rssi }}'
@@ -153,64 +155,42 @@ sensor:
     sensors:
       upstairs_ups_battery_minutes:
         friendly_name: "Upstairs UPS Battery Minutes"
-        entity_id:
-          - sensor.upstairs_ups_battery_runtime
         value_template: "{{ ((states('sensor.upstairs_ups_battery_runtime')) | float / 60) | round(0) }}"
         unit_of_measurement: "min"
-      load_1m_templated:
-        friendly_name: "CPU Load (1m)"
-        icon_template: mdi:memory
-        value_template: "{{ states('sensor.load_1m') | float | round(2) }}"
       weewx_outside_temperature:
         friendly_name: Outside Temperature
-        entity_id:
-          - sensor.weewx_weather
         value_template: "{{ states.sensor.weewx_weather.attributes.current['outTemp'] }}"
         unit_of_measurement: '°F'
       weewx_inside_temperature:
         friendly_name: Inside Temperature
-        entity_id:
-          - sensor.weewx_weather
         value_template: "{{ states.sensor.weewx_weather.attributes.current['insideTemp'] }}"
         unit_of_measurement: '°F'
       weewx_outside_humidity:
         friendly_name: Outside Humidity
-        entity_id:
-          - sensor.weewx_weather
         icon_template: mdi:water-percent
         value_template: "{{ states.sensor.weewx_weather.attributes.current['humidity'] }}"
         unit_of_measurement: '%'
       weewx_inside_humidity:
         friendly_name: Inside Humidity
-        entity_id:
-          - sensor.weewx_weather
         icon_template: mdi:water-percent
         value_template: "{{ states.sensor.weewx_weather.attributes.current['insideHumidity'] }}"
         unit_of_measurement: '%'
       weewx_wind_speed:
         friendly_name: Wind Speed
-        entity_id:
-          - sensor.weewx_weather
         icon_template: mdi:weather-windy 
         value_template: "{{ states.sensor.weewx_weather.attributes.current['windSpeed'] }}"
         unit_of_measurement: 'mph'
       weewx_wind_direction_ordinal:
         friendly_name: Wind Direction
-        entity_id:
-          - sensor.weewx_weather
         icon_template: mdi:weather-windy
         value_template: "{{ states.sensor.weewx_weather.attributes.current['windDirText'] }}"
       weewx_solar_altitude:
         friendly_name: Solar Altitude
-        entity_id:
-          - sensor.weewx_weather
         value_template: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
         unit_of_measurement: '°'
       # http://www.csgnetwork.com/barcorrecthcalc.html - vistasea correction 1.1
       bme680_sensor_sealevel_pressure:
         friendly_name: Sealevel Pressure
-        entity_id:
-          - sensor.bme680_sensor_pressure
         icon_template: mdi:gauge
         value_template: "{{ ((states('sensor.bme680_sensor_pressure')) | float + 1.1) | round(1) }}"
         unit_of_measurement: 'mb'
@@ -271,6 +251,19 @@ tts:
 
 lovelace:
   mode: yaml
+  resources:
+    - url: /hacsfiles/bignumber-card/bignumber-card.js?v=0.0.2
+      type: module
+    - url: /hacsfiles/custom-header/custom-header.js?v=0.0.2
+      type: module
+    - url: /hacsfiles/lovelace-card-tools/card-tools.js
+      type: module
+    - url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js?=0.0.2
+      type: module
+    - url: /hacsfiles/flex-horseshoe-card/flex-horseshoe-card.js?v=0.0.2
+      type: module
+    - url: /local/vertical-style-card.js?v=0.1
+      type: js
 
 frontend:
 

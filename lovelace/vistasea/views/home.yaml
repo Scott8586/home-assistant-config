@@ -163,8 +163,6 @@ cards:
             padding: 0px 0px 0px;
           }
   - entities:
-      - cover.hvw_main_door
-      - cover.hvw_side_door
       - cover.vs_front_door_1
       - cover.vs_front_door_2
       - cover.vs_rear_door

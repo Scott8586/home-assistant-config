@@ -82,12 +82,6 @@ pi_hole:
   - host: !secret vistasea_pihole_host
     name: Vistasea Pi-hole
 
-cover:
-    - platform: myq
-      username: !secret myq_user
-      password: !secret myq_pass
-      type: liftmaster
-      
 camera:
   - platform: unifiprotect
 

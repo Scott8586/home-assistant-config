@@ -23,13 +23,9 @@ sensor.load_1m:
 sensor.upstairs_ups_battery_runtime:
   hidden: true
 sensor.bme680_sensor_temperature:
-  icon: mdi:thermometer
-  friendly_name: Temperature
+  friendly_name: Loft Temperature
 sensor.bme680_sensor_humidity:
-  icon: mdi:water
-  friendly_name: Humidity
-  device_class: humidity
-  unit_of_measurement: "%"
+  friendly_name: Loft Humidity
 sensor.bme680_sensor_pressure:
   icon: mdi:gauge
   friendly_name: Pressure
@@ -50,6 +46,9 @@ device_tracker.stephs_ipad_bt:
   hidden: true
   source_type: bluetooth
 device_tracker.stephs_iphone_bt:
+  hidden: true
+  source_type: bluetooth
+device_tracker.stephs_apwa_bt:
   hidden: true
   source_type: bluetooth
 device_tracker.srp_owntracks:

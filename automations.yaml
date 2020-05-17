@@ -100,8 +100,9 @@
       message: "z: {{ trigger.to_state.name }} appears Away"
 
 # Test message      
-- id: 'pingmessage'
-  alias: "Telegram Test command"
+- id: 'testmessage'
+  alias: "Telegram Test Message"
+  initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
@@ -116,9 +117,61 @@
     data:
       message: "pong"
 
+# Thermostat control     
+- id: 'thermocontrol'
+  alias: "Thermostat home/away command"
+  initial_state: 'on'
+  trigger:
+    platform: event
+    event_type: telegram_command
+    event_data:
+      command: '/thermostat'
+  action:
+    - service: climate.set_preset_mode
+      data_template:
+        entity_id: climate.main_floor
+        preset_mode: >
+          {% set token = trigger.event.data['args'][0] %}
+          {% if token == 'away' %}
+            away
+          {% elif token == 'home' %}
+            none
+          {% endif %}
+    # everything else will just report status
+    - service: notify.telegram_vistasea
+      data_template:
+        message: > 
+          Thermostat Preset: {{state_attr('climate.main_floor', 'preset_mode')}}, 
+          Set: {{state_attr('climate.main_floor', 'temperature')}}F, 
+          Now: {{state_attr('climate.main_floor', 'current_temperature')}}F
+# Check Garage doors
+- id: 'checkgaragedoors'
+  alias: "Check Garage Doors"
+  initial_state: 'on'
+  trigger:
+    platform: time
+    at: '21:30:00'
+  condition:
+    condition: or
+    conditions:
+      - condition: state
+        entity_id: 'cover.vs_front_door_1'
+        state: 'open'
+      - condition: state
+        entity_id: 'cover.vs_front_door_2'
+        state: 'open'
+      - condition: state
+        entity_id: 'cover.vs_rear_door'
+        state: 'open'
+  action:
+    - service: notify.telegram_vistasea
+      data:
+        message: "A garage door is open"
+
 # Relink message
 - id: 'relinkmessage'
   alias: "Cycle Modem Link Command"
+  initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
@@ -139,6 +192,7 @@
 # Reload message      
 - id: 'reloadmessage'
   alias: "Home Assistant Reload command"
+  initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
@@ -153,6 +207,7 @@
 # Restart message      
 - id: 'restartmessage'
   alias: "Home Assistant Restart command"
+  initial_state: 'on'
   trigger:
     platform: event
     event_type: telegram_command
@@ -167,6 +222,7 @@
 # Reboot message      
 - id: 'rebootmessage'       
   alias: "Home Assistant Reboot command"
+  initial_state: 'on'
   trigger:                  
     platform: event         
     event_type: telegram_command

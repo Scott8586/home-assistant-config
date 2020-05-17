@@ -21,7 +21,8 @@ cards:
     title: Network Operations
     type: entities
   - entities:
-      - automation.telegram_test_command
+      - automation.telegram_test_message
+      - automation.check_garage_doors
     show_header_toggle: false
     theme: default
     title: Test Messages

@@ -13,6 +13,8 @@ homeassistant:
   # Customization file
   customize: !include customize.yaml
   customize_glob: !include customize_glob.yaml
+  whitelist_external_dirs:
+    - /config
 
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
@@ -43,12 +45,6 @@ telegram_bot:
       - !secret telegram_chatid
       - !secret telegram_userid
 
-unifiprotect:
-  host: !secret protect_host
-  username: !secret protect_user
-  password: !secret protect_pass
-  minimum_score: 50
-
 notify:
   - name: telegram_vistasea
     platform: telegram
@@ -57,11 +53,12 @@ notify:
     
 device_tracker:
   - platform: mqtt
+    source_type: bluetooth
     devices:
       scotts_iphone_bt: 'monitor/vistasea_living/scotts_iphone_bt/device_tracker'
       stephs_iphone_bt: 'monitor/vistasea_living/stephs_iphone_bt/device_tracker'
-#      scotts_ipad_bt: 'monitor/vistasea_living/scotts_ipad_bt/device_tracker'
-#      stephs_ipad_bt: 'monitor/vistasea_living/stephs_ipad_bt/device_tracker'
+      scotts_ipad_bt: 'monitor/vistasea_living/scotts_ipad_bt/device_tracker'
+      stephs_ipad_bt: 'monitor/vistasea_living/stephs_ipad_bt/device_tracker'
       scotts_g645_bt: 'monitor/vistasea_living/scotts_g645_bt/device_tracker'
       stephs_apwa_bt: 'monitor/vistasea_living/stephs_apwa_bt/device_tracker'
       explorer_bt: 'monitor/vistasea_garage/explorer/device_tracker'
@@ -70,12 +67,12 @@ device_tracker:
   - platform: mqtt_json
     devices:
       srp_iphone_ios: 'location/phone/srp_iphone_ios'
-
+      explorer_gps: 'location/car/explorer'
 
 logger:
   default: info
-  logs:
-    homeassistant.components.automation: debug
+  #logs:
+    # homeassistant.components.automation: debug
     # homeassistant.components.telegram_bot: debug
     # aiounifi: debug
     # homeassistant.components.unifi: debug
@@ -83,9 +80,6 @@ logger:
 pi_hole:
   - host: !secret vistasea_pihole_host
     name: Vistasea Pi-hole
-
-camera:
-  - platform: unifiprotect
 
 # Discover some devices automatically
 discovery:
@@ -100,7 +94,6 @@ climate:
 sensor:
   - platform: bme680
     i2c_address: 0x77
-  - platform: unifiprotect
   - platform: mqtt
     state_topic: 'monitor/vistasea_garage/audi'
     value_template: '{{ value_json.rssi }}'
@@ -116,6 +109,43 @@ sensor:
     value_template: '{{ value_json.rssi }}'
     unit_of_measurement: 'dBm'
     name: 'Rav4'
+  - platform: mqtt           
+    state_topic: 'environment/vistasea_garage/bme280_temperature'
+    name: 'Garage Temperature'
+    unit_of_measurement: '°F'
+  - platform: mqtt           
+    state_topic: 'environment/vistasea_garage/bme280_humidity'
+    name: 'Garage Humidity'    
+  - platform: mqtt           
+    state_topic: 'environment/vistasea_garage/bme280_pressure'
+    unit_of_measurement: 'hPa'
+    name: 'Garage Pressure'  
+  - platform: mqtt           
+    state_topic: 'environment/vistasea_garage/bme280_sealevel_pressure'
+    unit_of_measurement: 'hPa'
+    name: 'Garage Sealevel Pressure'
+    # CCS811 TVOC and eCO2 measurement
+  - platform: mqtt
+    name: 'Main Floor CO2'
+    state_topic: "tele/tasmota_1E2913/SENSOR"
+    value_template: "{{ value_json['CCS811'].eCO2 }}"
+    json_attributes_topic: "tele/tasmota_1E2913/SENSOR"
+    availability_topic: "tele/tasmota_1E2913/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    unit_of_measurement: 'ppm'
+    icon: mdi:periodic-table-co2
+  - platform: mqtt
+    name: 'Tasomta Node1 State'
+    state_topic: "tele/tasmota_1E2913/STATE"
+    value_template: "{{ value_json['Wifi'].RSSI }}"
+    json_attributes_topic: "tele/tasmota_1E2913/STATE"
+    availability_topic: "tele/tasmota_1E2913/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    unit_of_measurement: '%'
+    icon: mdi:wifi
+    device_class: signal_strength
   # Weewx Weather
   - platform: rest
     resource: http://192.168.32.157/weewx/daily.json
@@ -126,31 +156,34 @@ sensor:
       - current
       - almanac
     value_template: '{{ value_json.location }}'
-  - platform: nut
-    name: Upstairs UPS
-    host: !secret ups_host
-    port: 3493
-    alias: ups
-    username: !secret ups_user
-    password: !secret ups_pass
-    resources:
-      - ups.load
-#      - ups.realpower.nominal
-      - input.voltage
-      - battery.runtime
-      - ups.status.display
   # Local System monitor
   - platform: systemmonitor
     resources:
       - type: memory_use_percent
+      - type: swap_use_percent
+      - type: disk_use_percent
+        arg: /
       - type: processor_use
       - type: load_1m
       - type: last_boot
   # Template      
   - platform: template
     sensors:
+      # Internet in mbps from erx SNMP, transformed by derivative
+      internet_in_mbps:
+        entity_id: sensor.erx_wan_in_derivative
+        friendly_name: "Internet WAN In"
+        unit_of_measurement: 'Mbps'
+        value_template: "{{ [((states('sensor.erx_wan_in_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
+        icon_template: mdi:download-network
+      internet_out_mbps:
+        entity_id: sensor.erx_wan_out_derivative
+        friendly_name: "Internet WAN Out"
+        unit_of_measurement: 'Mbps'
+        value_template: "{{ [((states('sensor.erx_wan_out_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
+        icon_template: mdi:upload-network
       upstairs_ups_battery_minutes:
-        friendly_name: "Upstairs UPS Battery Minutes"
+        friendly_name: "UPS Battery Minutes"
         value_template: "{{ ((states('sensor.upstairs_ups_battery_runtime')) | float / 60) | round(0) }}"
         unit_of_measurement: "min"
       weewx_outside_temperature:
@@ -159,18 +192,15 @@ sensor:
         unit_of_measurement: '°F'
       weewx_inside_temperature:
         friendly_name: Inside Temperature
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['insideTemp'] }}"
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['inTemp'] }}"
         unit_of_measurement: '°F'
       weewx_outside_humidity:
         friendly_name: Outside Humidity
-        icon_template: mdi:water-percent
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['humidity'] }}"
-        unit_of_measurement: '%'
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['outHumidity'] }}"
       weewx_inside_humidity:
         friendly_name: Inside Humidity
         icon_template: mdi:water-percent
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['insideHumidity'] }}"
-        unit_of_measurement: '%'
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['inHumidity'] }}"
       weewx_wind_speed:
         friendly_name: Wind Speed
         icon_template: mdi:weather-windy 
@@ -180,9 +210,33 @@ sensor:
         friendly_name: Wind Direction
         icon_template: mdi:weather-windy
         value_template: "{{ states.sensor.weewx_weather.attributes.current['windDirText'] }}"
+      weewx_outside_dewpoint:                                                                                 
+        friendly_name: Outside Dewpoint                                                                       
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['dewpoint'] }}"                        
+        unit_of_measurement: "°F"                                                                             
+      weewx_outside_windchill:                                                                                 
+        friendly_name: Outside Windchill
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['windchill'] }}"                        
+        unit_of_measurement: "°F"                                                                              
+      weewx_outside_heat_index:                                                                                 
+        friendly_name: Outside Heat Index
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['heatindex'] }}"                        
+        unit_of_measurement: "°F"                                                                              
+      weewx_garage_temperature:                                                                                 
+        friendly_name: Garage Temperature                                                                       
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraTemp1'] }}"                        
+        unit_of_measurement: "°F"                                                                              
+      weewx_garage_humidity:                                                                                     
+        friendly_name: Garage Humidity                                                                           
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraHumid1'] }}"                 
+      weewx_cloudbase:                                                             
+        friendly_name: Cloudbase
+        value_template: "{{ states.sensor.weewx_weather.attributes.current['cloudbase'] }}"   
+        unit_of_measurement: "ft"
       weewx_solar_altitude:
         friendly_name: Solar Altitude
-        value_template: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
+        value_template: "{{ state_attr('sun.sun', 'elevation') }}"
+#        value_template: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
         unit_of_measurement: '°'
       # http://www.csgnetwork.com/barcorrecthcalc.html - vistasea correction 1.1
       bme680_sensor_sealevel_pressure:
@@ -190,33 +244,83 @@ sensor:
         icon_template: mdi:gauge
         value_template: "{{ ((states('sensor.bme680_sensor_pressure')) | float + 1.1) | round(1) }}"
         unit_of_measurement: 'mb'
-      vistasea_dns_query_rate:
-        friendly_name: DNS Query Rate
-        value_template: "{{ ((state_attr('sensor.vistasea_pi_hole_dns_queries_today_statistics','average_change')) | float * 2) }}"
-        unit_of_measurement: 'queries per min'
+      last_boot_date_time:
+        friendly_name: "Last Boot"
+        value_template: '{{ states.sensor.last_boot.state.split("T")[0] }}'
+      netgear_lte_usage_gb:
+        friendly_name: Data Usage
+        entity_id: sensor.netgear_lte_usage
+        unit_of_measurement: 'GiB'
+        value_template: "{{ ( states('sensor.netgear_lte_usage') | float / 1024) | round(2) }}"
 #  - platform: noaa_tides
 #    station_id: 9446489
  # CPU Temperature of pi
   - platform: command_line
     name: CPU Temperature
     command: "cat /sys/class/thermal/thermal_zone0/temp"
-    value_template: "{{ value | multiply(0.001) | float | round(1) }} °C"
+    value_template: "{{ value | multiply(0.001) | float | round(0) }}"
 #    value_template: "{{ (value | multiply(0.0018) + 32) | float | round(2) }} °F"
-#    unit_of_measurement: "°C" # unit of measurement is for knowing the incoming units, not for units presentation
-  - platform: statistics
-    name: vistasea_pi_hole_dns_queries_today_statistics
-    entity_id: sensor.vistasea_pi_hole_dns_queries_today
+    unit_of_measurement: " °C" # unit of measurement is for knowing the incoming units, not for units presentation
+  - platform: filesize
+    file_paths:
+      - /config/home-assistant_v2.db
+#  - platform: command_line
+#    name: installed_version_2
+#    command: "cat .HA_VERSION"
+  - platform: version
+    name: latest_available_version
+    source: hassio
+  - platform: version
+    name: installed_version
 # Time and date
   - platform: uptime
   - platform: time_date
     display_options:
       - 'time'
-      - 'date'
-      - 'date_time'
-      - 'date_time_utc'
-      - 'date_time_iso'
-      - 'time_date'
-      - 'time_utc'
+#      - 'date'
+#      - 'date_time'
+#      - 'date_time_utc'
+#      - 'date_time_iso'
+#      - 'time_date'
+#      - 'time_utc'
+  - platform: snmp
+    host: 192.168.32.162
+    baseoid: 1.3.6.1.2.1.25.1.8.1
+    name: raspi_livingroom_vs_cpu_temperature
+    scan_interval: 60
+    value_template: "{{ value }}"
+    unit_of_measurement: " °C"
+  - platform: snmp
+    host: 192.168.32.163
+    baseoid: 1.3.6.1.2.1.25.1.8.1
+    name: raspi_garage_vs_cpu_temperature
+    scan_interval: 60
+    value_template: "{{ value }}"
+    unit_of_measurement: " °C"
+  - platform: snmp
+    name: erx_wan_in
+    host: 192.168.32.254
+    baseoid: 1.3.6.1.2.1.31.1.1.1.6.4
+    community: public
+    version: '2c'
+    scan_interval: 10
+  - platform: snmp
+    name: erx_wan_out
+    host: 192.168.32.254
+    baseoid: 1.3.6.1.2.1.31.1.1.1.10.4
+    community: public
+    version: '2c'
+    scan_interval: 10
+  - platform: derivative
+    name: erx_wan_in_derivative
+    source: sensor.erx_wan_in
+    unit_time: s
+    unit: B
+  - platform: derivative
+    name: erx_wan_out_derivative
+    source: sensor.erx_wan_out
+    unit_time: s
+    unit: B
 # Add the moon
   - platform: moon
 
@@ -241,24 +345,26 @@ weather:
     scan_interval:
       minutes: 15
 
-# Text to speech
-tts:
-  - platform: google_translate
-
 lovelace:
   mode: yaml
   resources:
-    - url: /hacsfiles/bignumber-card/bignumber-card.js?v=0.0.2
+    - url: /hacsfiles/bignumber-card/bignumber-card.js
       type: module
-    - url: /hacsfiles/custom-header/custom-header.js?v=0.0.2
+    - url: /hacsfiles/custom-header/custom-header.js
       type: module
     - url: /hacsfiles/lovelace-card-tools/card-tools.js
       type: module
-    - url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js?=0.0.2
+    - url: /hacsfiles/secondaryinfo-entity-row/secondaryinfo-entity-row.js
       type: module
-    - url: /hacsfiles/flex-horseshoe-card/flex-horseshoe-card.js?v=0.0.2
+    - url: /hacsfiles/flex-horseshoe-card/flex-horseshoe-card.js
       type: module
-    - url: /local/vertical-style-card.js?v=0.1
+    - url: /hacsfiles/lovelace-multiple-entity-row/multiple-entity-row.js
+      type: module
+    - url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js
+      type: module
+    - url: /hacsfiles/bar-card/bar-card.js
+      type: module
+    - url: /local/vertical-style-card.js
       type: js
 
 frontend:
@@ -269,4 +375,5 @@ recorder: !include recorder.yaml
 zone: !include zones.yaml
 binary_sensor: !include binary_sensors.yaml
 automation: !include automations.yaml
+automation split: !include_dir_list automations
 script: !include scripts.yaml

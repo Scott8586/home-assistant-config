@@ -6,12 +6,40 @@ badges: []
 cards:
   - entities:
       - sensor.weewx_weather
-      - sensor.weewx_outside_temperature
-      - sensor.weewx_outside_humidity
-      - sensor.weewx_wind_speed
-      - sensor.weewx_wind_direction_ordinal
-      - sensor.weewx_inside_temperature
-      - sensor.weewx_inside_humidity
+      - type: custom:multiple-entity-row         
+        entity: sensor.weewx_outside_temperature
+        name: Outside
+        state_header: Temp
+        entities:
+          - entity: sensor.weewx_outside_humidity
+            name: Humidity  
+      - type: custom:multiple-entity-row         
+        entity: sensor.weewx_garage_temperature
+        name: Garage
+#        state_header: Temp
+        entities:
+          - entity: sensor.weewx_garage_humidity
+            name: " "
+      - type: custom:multiple-entity-row         
+        entity: sensor.weewx_inside_temperature
+        name: Loft
+#        state_header: Temp
+        entities:
+          - entity: sensor.weewx_inside_humidity
+            name: " "
+#      - sensor.weewx_outside_temperature
+#      - sensor.weewx_outside_humidity
+      - type: custom:multiple-entity-row         
+        entity: sensor.weewx_wind_direction_ordinal
+        name: Wind
+        state_header: Dir.
+        entities:
+          - entity: sensor.weewx_wind_speed
+            name: Speed
+#      - sensor.weewx_wind_speed
+#      - sensor.weewx_wind_direction_ordinal
+#      - sensor.weewx_inside_temperature
+#      - sensor.weewx_inside_humidity
     title: Weather Station
     type: entities
   - entities:

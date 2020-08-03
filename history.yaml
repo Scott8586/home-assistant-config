@@ -9,3 +9,5 @@ include:
     - sensor.weewx_inside_temperature
     - sensor.processor_use
     - sensor.memory_use_percent
+    - sensor.load_1m
+    - sensor.netgear_lte_usage

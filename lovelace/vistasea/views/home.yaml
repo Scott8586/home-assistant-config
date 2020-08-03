@@ -4,6 +4,7 @@ theme: default
 badges:
   - entity: person.scott
   - entity: person.stephanie
+  - entity: device_tracker.explorer_gps
   - entity: device_tracker.explorer_bt
   - entity: device_tracker.rav4_bt
   - entity: device_tracker.audi_bt
@@ -17,6 +18,35 @@ cards:
     type: picture-entity
   - entity: climate.main_floor
     type: thermostat
+  - color_thresholds:
+    - color: '#e45e65'
+      value: 2000
+    - color: '#e0b400'
+      value: 1000
+    - color: '#0da035'
+      value: 0
+    color_thresholds_transition: hard
+    entities:
+      - sensor.main_floor_co2
+    group: false
+    hour24: true
+    line_width: 5
+    points_per_hour: 1
+    align_icon: left
+    align_header: left
+    show:
+      extrema: false
+      average: false
+      fill: fade
+      icon: true
+      labels: false
+      name: true
+      state: true
+    style: |
+      ha-card {         
+        border: solid 2px var(--primary-color);
+      }                 
+    type: 'custom:mini-graph-card'
   - type: 'custom:vertical-style-card'
     title: Climate
     style:
@@ -168,27 +198,3 @@ cards:
       - cover.vs_rear_door
     title: Cover
     type: entities
-  - entities:
-      - device_tracker.scotts_iphone
-#      - sensor.scott_s_iphone_battery_state
-#      - sensor.scott_s_iphone_battery_level
-      - device_tracker.scotts_iphone_bt
-#      - device_tracker.scotts_g645_bt
-      - device_tracker.scotts_ipad2
-      - device_tracker.scotts_personal_mbp
-      - device_tracker.scotts_work_mbp2
-      - device_tracker.stephs_iphone
-      - device_tracker.stephs_iphone_bt
-      - device_tracker.stephs_apple_watch
-      - device_tracker.stephs_apwa_bt
-      - device_tracker.stephs_ipad2
-      - device_tracker.nancys_ipad
-    title: Personal Devices
-    type: entities
-  - entities:
-      - sensor.rav4
-      - sensor.explorer
-      - sensor.audi
-    title: Cars
-    type: entities
-

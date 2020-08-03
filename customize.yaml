@@ -22,6 +22,10 @@ sensor.load_1m:
   hidden: true
 sensor.upstairs_ups_battery_runtime:
   hidden: true
+sensor.raspi_livingroom_vs_cpu_temperature:
+  friendly_name: Livingroom raspi8 CPU Temp
+sensor.raspi_garage_vs_cpu_temperature:
+  friendly_name: Gararge raspi7 CPU Temp
 sensor.bme680_sensor_temperature:
   friendly_name: Loft Temperature
 sensor.bme680_sensor_humidity:
@@ -36,22 +40,3 @@ sensor.bme680_sensor_air_quality:
   unit_of_measurement: "%"
 weather.dark_sky:
   friendly_name: 'Dark Sky: Grapeview'
-device_tracker.scotts_ipad_bt:
-  hidden: true
-  source_type: bluetooth
-device_tracker.scotts_iphone_bt:
-  hidden: true
-  source_type: bluetooth
-device_tracker.stephs_ipad_bt:
-  hidden: true
-  source_type: bluetooth
-device_tracker.stephs_iphone_bt:
-  hidden: true
-  source_type: bluetooth
-device_tracker.stephs_apwa_bt:
-  hidden: true
-  source_type: bluetooth
-device_tracker.srp_owntracks:
-  hidden: true
-device_tracker.srp_iphone_ios:
-  hidden: true

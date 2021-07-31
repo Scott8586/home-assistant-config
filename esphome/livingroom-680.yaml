@@ -1,0 +1,65 @@
+esphome:
+  name: livingroom-680
+  platform: ESP8266
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: "043cb88f28fb6f0ab5ff63ea01a82134"
+
+wifi:
+  ssid: "srp-vistasea"
+  password: "kicker87"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Livingroom-680 Fallback Hotspot"
+    password: "DwKhHxmz1B1S"
+
+captive_portal:
+
+# Example configuration entry
+web_server:
+
+# Activates prometheus /metrics endpoint
+prometheus:
+
+# Example configuration entry
+time:
+  - platform: sntp
+    id: sntp_time
+    servers:
+      - 192.168.32.157
+
+i2c:
+  sda: 4
+  scl: 5
+  scan: True
+
+bme680_bsec:
+  address: 0x77
+  
+sensor:
+  - platform: bme680_bsec
+    temperature:
+      name: "Living Room Temperature"
+    pressure:
+      name: "Living Room Pressure"
+    humidity:
+      name: "Living Room Humidity"
+    iaq:
+      name: "Living Room IAQ"
+    co2_equivalent:
+      name: "Living Room eCO2"
+    breath_voc_equivalent:
+      name: "Living Room eVOC"
+
+text_sensor:
+  - platform: bme680_bsec
+    iaq_accuracy:
+      name: "Living Room IAQ Accuracy"

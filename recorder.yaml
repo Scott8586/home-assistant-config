@@ -15,4 +15,5 @@ exclude:
   - sensor.netgear_lte_connection_text
   - sensor.upstairs_ups_battery_minutes
   - sensor.upstairs_ups_battery_runtime
-  
+  - sensor.erx_wan_in
+  - sensor.erx_wan_out

@@ -1,6 +1,6 @@
 homeassistant:
   # Name of the location where Home Assistant is running
-  name: Vistasea
+  name: Home
   # Location required to calculate the time the sun rises and sets
   latitude: !secret vistasea_latitude
   longitude: !secret vistasea_longitude
@@ -13,31 +13,36 @@ homeassistant:
   # Customization file
   customize: !include customize.yaml
   customize_glob: !include customize_glob.yaml
-  whitelist_external_dirs:
+  allowlist_external_dirs:
     - /config
 
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
 
+#
+# Discover some devices automatically
+discovery:
+
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 # http:
 #   base_url: example.duckdns.org:8123
 
-netgear_lte:
-  - host: !secret lte_modem_host
-    password: !secret lte_modem_pass
-    #scan_interval: 60
-    sensor:
-      monitored_conditions:
-      - usage
-      - connection_text
-      - radio_quality
-      - rx_level
-      - tx_level
-      - current_band
+#netgear_lte:
+#  - host: !secret lte_modem_host
+#    password: !secret lte_modem_pass
+#    #scan_interval: 60
+#    sensor:
+#      monitored_conditions:
+#      - usage
+#      - connection_text
+#      - radio_quality
+#      - rx_level
+#      - tx_level
+#      - current_band
 
 telegram_bot:
+#  - platform: broadcast
   - platform: polling
     api_key: !secret telegram_apikey
     parse_mode: html # otherwise '_' are interpreted as for italics in msg parser
@@ -51,38 +56,30 @@ notify:
     api_key: !secret telegram_apikey
     chat_id: !secret telegram_chatid #first chat Group "HA Vistasea"
     
+camera:
+  - platform: local_file
+    name: Front Yard Snapshot
+    file_path: /config/www/snapshots/vs_front_yard.png
+  - platform: local_file
+    name: Back Yard Snapshot
+    file_path: /config/www/snapshots/vs_back_yard.png
+
 device_tracker:
-  - platform: mqtt
-    source_type: bluetooth
-    devices:
-      scotts_iphone_bt: 'monitor/vistasea_living/scotts_iphone_bt/device_tracker'
-      stephs_iphone_bt: 'monitor/vistasea_living/stephs_iphone_bt/device_tracker'
-      scotts_ipad_bt: 'monitor/vistasea_living/scotts_ipad_bt/device_tracker'
-      stephs_ipad_bt: 'monitor/vistasea_living/stephs_ipad_bt/device_tracker'
-      scotts_g645_bt: 'monitor/vistasea_living/scotts_g645_bt/device_tracker'
-      stephs_apwa_bt: 'monitor/vistasea_living/stephs_apwa_bt/device_tracker'
-      explorer_bt: 'monitor/vistasea_garage/explorer/device_tracker'
-      audi_bt: 'monitor/vistasea_garage/audi/device_tracker'
-      rav4_bt: 'monitor/vistasea_garage/rav4/device_tracker'
   - platform: mqtt_json
     devices:
       srp_iphone_ios: 'location/phone/srp_iphone_ios'
-      explorer_gps: 'location/car/explorer'
+      audi_a6_gps: 'location/car/audi_a6_gps'
+      audi_q7_gps: 'location/car/audi_q7_gps'
 
 logger:
   default: info
-  #logs:
-    # homeassistant.components.automation: debug
+  logs:
+    homeassistant.components.command_line.switch: warning
+    homeassistant.components.automation: warning
+    #homeassistant.config: debug
     # homeassistant.components.telegram_bot: debug
     # aiounifi: debug
     # homeassistant.components.unifi: debug
-
-pi_hole:
-  - host: !secret vistasea_pihole_host
-    name: Vistasea Pi-hole
-
-# Discover some devices automatically
-discovery:
 
 climate:
   - platform: venstar
@@ -90,62 +87,111 @@ climate:
     ssl: false
     humidifier: false
 
+envisalink:
+  host: !secret envisalink_host
+  panel_type: HONEYWELL
+  user_name: user
+  password: user
+  code: '3071'
+  port: 4025
+  evl_version: 4
+  keepalive_interval: 60
+  zonedump_interval: 20
+  timeout: 10
+  zones:
+    10:
+      name: 'Front Door'
+      type: 'door'
+    11:
+      name: 'Back Door'
+      type: 'door'
+    12:
+      name: 'Upper Deck Door'
+      type: 'door'
+    13:
+      name: 'Bedroom Door'
+      type: 'door'
+    14:
+      name: 'Garage Door'
+      type: 'door'
+    20:
+      name: 'Laundry Room Smoke'
+      type: 'smoke'
+    21:
+      name: 'Lower Hall Smoke'
+      type: 'smoke'
+    22:
+      name: 'Upper Hall Smoke'
+      type: 'smoke'
+    23:
+      name: 'Garage Smoke'
+      type: 'smoke'
+    29:
+      name: 'Garage Motion'
+      type: 'motion'
+  partitions:
+    1:
+      name: 'House Alarm'
+    2:
+      name: 'Garage Alarm'
+
 # Sensors
 sensor:
-  - platform: bme680
-    i2c_address: 0x77
-  - platform: mqtt
-    state_topic: 'monitor/vistasea_garage/audi'
-    value_template: '{{ value_json.rssi }}'
-    unit_of_measurement: 'dBm'
-    name: 'Audi'
-  - platform: mqtt
-    state_topic: 'monitor/vistasea_garage/explorer'
-    value_template: '{{ value_json.rssi }}'
-    unit_of_measurement: 'dBm'
-    name: 'Explorer'
-  - platform: mqtt
-    state_topic: 'monitor/vistasea_garage/rav4'
-    value_template: '{{ value_json.rssi }}'
-    unit_of_measurement: 'dBm'
-    name: 'Rav4'
+  - platform: gpsd
+    name: Vistasea GPS
+    host: 192.168.32.157
+    scan_interval: 60
+  - platform: bme280
+    name: Loft
+    monitored_conditions:
+      - temperature
+      - humidity
+      - pressure
   - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/bme280_temperature'
+    state_topic: 'room-assistant/sensor/ble-audi-a6-ibeacon/attributes'
+    value_template: '{{ value_json.rssi }}'
+    unit_of_measurement: 'm' 
+    name: 'Audi A6'          
+  - platform: mqtt           
+    state_topic: 'room-assistant/sensor/ble-audi-q7-ibeacon/attributes'
+    value_template: '{{ value_json.distance }}'
+    unit_of_measurement: 'm' 
+    name: 'Audi Q7'          
+  - platform: mqtt           
+    state_topic: 'room-assistant/sensor/ble-toyota-rav4-ibeacon/attributes'
+    value_template: '{{ value_json.distance }}'
+    unit_of_measurement: 'm' 
+    name: 'Toyota Rav4'      
+  - platform: mqtt           
+    name: "Room Assistant Livingroom"
+    state_topic: room-assistant/status/livingroom-vs
+  - platform: mqtt           
+    name: "Room Assistant Garage"
+    state_topic: room-assistant/status/garage-vs
+  - platform: mqtt           
+    state_topic: 'environment/vistasea_garage/BME280_temperature'
     name: 'Garage Temperature'
     unit_of_measurement: '°F'
   - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/bme280_humidity'
+    state_topic: 'environment/vistasea_garage/BME280_humidity'
     name: 'Garage Humidity'    
   - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/bme280_pressure'
+    state_topic: 'environment/vistasea_garage/BME280_pressure'
     unit_of_measurement: 'hPa'
     name: 'Garage Pressure'  
   - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/bme280_sealevel_pressure'
+    state_topic: 'environment/vistasea_garage/BME280_sealevel_pressure'
     unit_of_measurement: 'hPa'
     name: 'Garage Sealevel Pressure'
-    # CCS811 TVOC and eCO2 measurement
   - platform: mqtt
-    name: 'Main Floor CO2'
-    state_topic: "tele/tasmota_1E2913/SENSOR"
-    value_template: "{{ value_json['CCS811'].eCO2 }}"
-    json_attributes_topic: "tele/tasmota_1E2913/SENSOR"
-    availability_topic: "tele/tasmota_1E2913/LWT"
+    name: bme280 Garage
+    state_topic: "environment/vistasea_garage/SENSOR"
+    value_template: "{{ value_json['BME280'].Temperature }}"
+    json_attributes_topic: "environment/vistasea_garage/SENSOR"
+    availability_topic: "environment/vistasea_garage/LWT"
     payload_available: "Online"
     payload_not_available: "Offline"
-    unit_of_measurement: 'ppm'
-    icon: mdi:periodic-table-co2
-  - platform: mqtt
-    name: 'Tasomta Node1 State'
-    state_topic: "tele/tasmota_1E2913/STATE"
-    value_template: "{{ value_json['Wifi'].RSSI }}"
-    json_attributes_topic: "tele/tasmota_1E2913/STATE"
-    availability_topic: "tele/tasmota_1E2913/LWT"
-    payload_available: "Online"
-    payload_not_available: "Offline"
-    unit_of_measurement: '%'
-    icon: mdi:wifi
-    device_class: signal_strength
+    unit_of_measurement: 'F'
   # Weewx Weather
   - platform: rest
     resource: http://192.168.32.157/weewx/daily.json
@@ -156,6 +202,18 @@ sensor:
       - current
       - almanac
     value_template: '{{ value_json.location }}'
+  - platform: rest
+    name: "Vera House Mode"
+    resource: !secret vera_resource
+    method: "GET"
+    scan_interval: 15
+    value_template: >-
+      {% set mapper =  {
+        '1' : 'Home',
+        '2' : 'Away',
+        '3' : 'Night',
+        '4' : 'Vacation' } %}
+      {{ mapper[value] }}
   # Local System monitor
   - platform: systemmonitor
     resources:
@@ -171,21 +229,23 @@ sensor:
     sensors:
       # Internet in mbps from erx SNMP, transformed by derivative
       internet_in_mbps:
-        entity_id: sensor.erx_wan_in_derivative
         friendly_name: "Internet WAN In"
         unit_of_measurement: 'Mbps'
         value_template: "{{ [((states('sensor.erx_wan_in_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
         icon_template: mdi:download-network
       internet_out_mbps:
-        entity_id: sensor.erx_wan_out_derivative
         friendly_name: "Internet WAN Out"
         unit_of_measurement: 'Mbps'
         value_template: "{{ [((states('sensor.erx_wan_out_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
         icon_template: mdi:upload-network
-      upstairs_ups_battery_minutes:
+      ups_battery_minutes:
         friendly_name: "UPS Battery Minutes"
-        value_template: "{{ ((states('sensor.upstairs_ups_battery_runtime')) | float / 60) | round(0) }}"
+        value_template: "{{ ((states('sensor.ups_battery_runtime')) | float / 60) | round(0) }}"
         unit_of_measurement: "min"
+      downstairs_thermostat_temperature:
+        friendly_name: Downstairs Temperature                               
+        value_template: "{{ state_attr('climate.main_floor', 'current_temperature') }}"
+        unit_of_measurement: "..F"          
       weewx_outside_temperature:
         friendly_name: Outside Temperature
         value_template: "{{ states.sensor.weewx_weather.attributes.current['outTemp'] }}"
@@ -226,9 +286,9 @@ sensor:
         friendly_name: Garage Temperature                                                                       
         value_template: "{{ states.sensor.weewx_weather.attributes.current['extraTemp1'] }}"                        
         unit_of_measurement: "°F"                                                                              
-      weewx_garage_humidity:                                                                                     
-        friendly_name: Garage Humidity                                                                           
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraHumid1'] }}"                 
+#      weewx_garage_humidity:                                                                                     
+#        friendly_name: Garage Humidity                                                                           
+#        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraHumid1'] }}"                 
       weewx_cloudbase:                                                             
         friendly_name: Cloudbase
         value_template: "{{ states.sensor.weewx_weather.attributes.current['cloudbase'] }}"   
@@ -236,7 +296,6 @@ sensor:
       weewx_solar_altitude:
         friendly_name: Solar Altitude
         value_template: "{{ state_attr('sun.sun', 'elevation') }}"
-#        value_template: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
         unit_of_measurement: '°'
       # http://www.csgnetwork.com/barcorrecthcalc.html - vistasea correction 1.1
       bme680_sensor_sealevel_pressure:
@@ -247,11 +306,15 @@ sensor:
       last_boot_date_time:
         friendly_name: "Last Boot"
         value_template: '{{ states.sensor.last_boot.state.split("T")[0] }}'
-      netgear_lte_usage_gb:
-        friendly_name: Data Usage
-        entity_id: sensor.netgear_lte_usage
+      current_date_time:
+        friendly_name: "Current Date/Time"
+        value_template: >
+          {% set x = states('sensor.time') %}
+          {{ now().strftime("%A, %B %e") + now().strftime(", %-I:%M %p")}}
+      mofi4500_lte_usage_gb:
+        friendly_name: Mofi4500 Data Usage
         unit_of_measurement: 'GiB'
-        value_template: "{{ ( states('sensor.netgear_lte_usage') | float / 1024) | round(2) }}"
+        value_template: "{{ ( states('sensor.mofi4500_lte_usage') | float / 1024) | round(2) }}"
 #  - platform: noaa_tides
 #    station_id: 9446489
  # CPU Temperature of pi
@@ -264,9 +327,6 @@ sensor:
   - platform: filesize
     file_paths:
       - /config/home-assistant_v2.db
-#  - platform: command_line
-#    name: installed_version_2
-#    command: "cat .HA_VERSION"
   - platform: version
     name: latest_available_version
     source: hassio
@@ -277,7 +337,7 @@ sensor:
   - platform: time_date
     display_options:
       - 'time'
-#      - 'date'
+      - 'date'
 #      - 'date_time'
 #      - 'date_time_utc'
 #      - 'date_time_iso'
@@ -288,6 +348,7 @@ sensor:
     baseoid: 1.3.6.1.2.1.25.1.8.1
     name: raspi_livingroom_vs_cpu_temperature
     scan_interval: 60
+    accept_errors: true
     value_template: "{{ value }}"
     unit_of_measurement: " °C"
   - platform: snmp
@@ -295,8 +356,44 @@ sensor:
     baseoid: 1.3.6.1.2.1.25.1.8.1
     name: raspi_garage_vs_cpu_temperature
     scan_interval: 60
+    accept_errors: true
     value_template: "{{ value }}"
     unit_of_measurement: " °C"
+  - platform: snmp
+    host: 192.168.30.1
+    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.2.101.1
+    name: Mofi4500 LTE Band
+    version: 2c
+    scan_interval: 23
+    accept_errors: true
+    value_template: "{{ value }}"
+  - platform: snmp
+    host: 192.168.30.1
+    version: 2c
+    name: Mofi4500 LTE RSRQ
+    unit_of_measurement: 'dB'
+    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.4.101.1
+    accept_errors: true
+    scan_interval: 27
+    value_template: '{{value | float}}'
+  - platform: snmp
+    host: 192.168.30.1
+    version: 2c
+    name: Mofi4500 LTE RSRP
+    unit_of_measurement: 'dB'
+    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.5.101.1
+    accept_errors: true
+    scan_interval: 27
+    value_template: '{{value | float}}'
+  - platform: snmp
+    host: 192.168.30.1
+    version: 2c
+    name: Mofi4500 LTE Usage
+    scan_interval: 23
+    unit_of_measurement: 'MiB'
+    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.7.101.1
+    accept_errors: true
+    value_template: '{{value | float}}'
   - platform: snmp
     name: erx_wan_in
     host: 192.168.32.254
@@ -304,6 +401,7 @@ sensor:
     community: public
     version: '2c'
     scan_interval: 10
+    accept_errors: true
   - platform: snmp
     name: erx_wan_out
     host: 192.168.32.254
@@ -311,6 +409,7 @@ sensor:
     community: public
     version: '2c'
     scan_interval: 10
+    accept_errors: true
   - platform: derivative
     name: erx_wan_in_derivative
     source: sensor.erx_wan_in
@@ -321,6 +420,22 @@ sensor:
     source: sensor.erx_wan_out
     unit_time: s
     unit: B
+#  - platform: statistics
+#    name: erx_wan_in_statistics
+#    entity_id: sensor.erx_wan_in
+#    sampling_size: 86400
+#    max_age: 24:00:00
+#  - platform: statistics
+#    name: erx_wan_out
+#    entity_id: sensor.erx_wan_out
+#    sampling_size: 86400
+#    max_age: 24:00:00
+  - platform: statistics
+    name: mofi4500_lte_statistics
+    entity_id: sensor.mofi4500_lte_usage
+    sampling_size: 28800
+    max_age: 24:00:00
+
 # Add the moon
   - platform: moon
 
@@ -350,7 +465,7 @@ lovelace:
   resources:
     - url: /hacsfiles/bignumber-card/bignumber-card.js
       type: module
-    - url: /hacsfiles/custom-header/custom-header.js
+    - url: /hacsfiles/simple-thermostat/simple-thermostat.js
       type: module
     - url: /hacsfiles/lovelace-card-tools/card-tools.js
       type: module
@@ -364,6 +479,12 @@ lovelace:
       type: module
     - url: /hacsfiles/bar-card/bar-card.js
       type: module
+    - url: /hacsfiles/button-card/button-card.js
+      type: module
+    - url: /hacsfiles/home-assistant-sun-card/home-assistant-sun-card.js
+      type: module
+    - url: /hacsfiles/mini-media-player/mini-media-player-bundle.js
+      type: module
     - url: /local/vertical-style-card.js
       type: js
 
@@ -376,4 +497,5 @@ zone: !include zones.yaml
 binary_sensor: !include binary_sensors.yaml
 automation: !include automations.yaml
 automation split: !include_dir_list automations
+rest_command: !include rest.yaml
 script: !include scripts.yaml

@@ -22,6 +22,14 @@ cards:
     - title: Local Machine                         
       type: entities                               
       entities:                                    
+        - type: custom:multiple-entity-row
+          entity: sensor.loft_humidity
+          name: Loft
+          icon: mdi:home-thermometer
+          state_header: Humid
+          entities:
+            - entity: sensor.loft_temperature
+              name: Temp
         - type: custom:multiple-entity-row         
           entity: sensor.installed_version         
           name: HA Installed Version               
@@ -91,89 +99,37 @@ cards:
             bar-card-value {                              
               text-shadow: 1px 1px 5px black;             
             }
-    - title: Remote Machines
-      type: entities
-      entities:
-        - entity: sensor.raspi_livingroom_vs_cpu_temperature
-        - entity: sensor.raspi_garage_vs_cpu_temperature
     type: 'custom:vertical-style-card'                    
     style:                                                
       font_size: 24px                                     
       border: true                                        
-#  - entities:
-#      - entity: sensor.load_1m
-#      - entity: sensor.cpu_temperature
-#      - entity: sensor.memory_use_percent
-#      - entity: sensor.processor_use
-#      - entity: sensor.last_boot
-#    title: Local Machine
-#    type: entities
-  - entities:
-      - sensor.upstairs_ups_status
-      - sensor.upstairs_ups_load
-      - sensor.upstairs_ups_input_voltage
-      - sensor.upstairs_ups_battery_minutes
-    title: UPS Status
+  - title: Remote Machines
     type: entities
-  - entities:
-      - automation.telegram_test_command
-      - automation.check_garage_doors
-    show_header_toggle: false
-    theme: default
-    title: Test Messages
-    type: entities
-  - title: Host Control
-    show_name: true
-    show_state: true
-    type: glance
     entities:
-      - entity: sensor.netgear_lte_current_band
-        name: Radio Link
-        icon 'mdi: restart'
-        tap_action:
-          action: call-service
-          service: automation.trigger
-          service_data:
-            entity_id: automation.cycle_modem_link_command
-      - entity: sensor.uptime
-        name: Lovelace UI
-        icon: 'mdi:restart'
-        tap_action:
-          action: call-service
-          service: automation.trigger
-          service_data:
-            entity_id: automation.home_assistant_reload_command
-      - entity: sensor.uptime
-        icon: 'mdi:restart'
-        name: Home Assistant
-        tap_action:         
-          action: call-service
-          service: automation.trigger
-          service_data:     
-            entity_id: automation.home_assistant_restart_command
-      - entity: sensor.last_boot
-        icon: 'mdi:restart' 
-        name: HA Server     
-        tap_action:         
-          action: call-service
-          service: automation.trigger
-          service_data:     
-            entity_id: automation.home_assistant_reboot_command
-  - title: Cycle Modem Connection                 
-    type: entities                                
-    theme: default                                
-    entities:                                     
-      - automation.cycle_modem_connection         
-  - entities:                                     
-      - entity: sensor.netgear_lte_connection_text
-      - entity: sensor.netgear_lte_current_band
-      - entity: sensor.netgear_lte_radio_quality
-      - entity: sensor.netgear_lte_tx_level
-      - entity: sensor.netgear_lte_rx_level
-      - entity: sensor.netgear_lte_usage 
-      - entity: sensor.netgear_lte_usage_gb
-    title: LB1120 LTE Modem 
-    type: entities 
+      - entity: sensor.vistasea_gps
+        tap_action:                       
+          action: url     
+          url_path: http://hub.tworoads.net/gpsd.php?host=192.168.32.157       
+      - entity: automation.gps_radio_fix_change
+      - entity: sensor.raspi_livingroom_vs_cpu_temperature
+      - entity: sensor.room_assistant_livingroom
+      - entity: sensor.raspi_garage_vs_cpu_temperature
+      - entity: sensor.room_assistant_garage
+  - entities:
+      - sensor.ups_status
+      - sensor.ups_battery_charge
+      - sensor.ups_load
+      - sensor.ups_input_voltage
+      - sensor.ups_battery_minutes
+    title: Loft UPS Status
+    type: entities
+  - entities:
+      - entity: sensor.mofi4500_lte_rsrp
+      - entity: sensor.mofi4500_lte_rsrq
+      - entity: sensor.mofi4500_lte_band
+      - entity: sensor.mofi4500_lte_usage_gb
+    title: Mofi 4500 LTE Modem
+    type: entities
   - title: Vistasea Pi-hole
     type: entities
     entities:

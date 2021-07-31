@@ -7,28 +7,45 @@ cards:
   - entities:
       - sensor.weewx_weather
       - type: custom:multiple-entity-row         
-        entity: sensor.weewx_outside_temperature
+        entity: sensor.weewx_outside_humidity
+        icon: mdi:thermometer
         name: Outside
-        state_header: Temp
+        state_header: Humidity
         entities:
-          - entity: sensor.weewx_outside_humidity
-            name: Humidity  
+          - entity: sensor.weewx_outside_temperature
+            name: Temp  
       - type: custom:multiple-entity-row         
-        entity: sensor.weewx_garage_temperature
+        entity: sensor.weewx_outside_dewpoint
+        icon: mdi:thermometer
+        name: Chill/Dewpoint
+        state_header: DewPt
+        entities:
+          - entity: sensor.weewx_outside_windchill
+            name: Chill  
+      - type: custom:multiple-entity-row         
+        entity: sensor.weewx_garage_humidity
         name: Garage
-#        state_header: Temp
+        state_header: Humidity
+        icon: mdi:thermometer
         entities:
-          - entity: sensor.weewx_garage_humidity
-            name: " "
+          - entity: sensor.weewx_garage_temperature
+            name: Temp 
       - type: custom:multiple-entity-row         
-        entity: sensor.weewx_inside_temperature
+        entity: sensor.weewx_inside_humidity
         name: Loft
-#        state_header: Temp
+        state_header: Humidity
+        icon: mdi:thermometer
         entities:
-          - entity: sensor.weewx_inside_humidity
-            name: " "
-#      - sensor.weewx_outside_temperature
-#      - sensor.weewx_outside_humidity
+          - entity: sensor.weewx_inside_temperature
+            name: Temp
+#      - type: custom:multiple-entity-row         
+#        entity: sensor.downstairs_thermostat_humidity
+#        name: Thermostat
+#        state_header: Humidity
+#         icon: mdi:thermometer
+#        entities:
+#          - entity: sensor.downstairs_thermostat_temperature
+#            name: Temp
       - type: custom:multiple-entity-row         
         entity: sensor.weewx_wind_direction_ordinal
         name: Wind
@@ -38,13 +55,14 @@ cards:
             name: Speed
 #      - sensor.weewx_wind_speed
 #      - sensor.weewx_wind_direction_ordinal
-#      - sensor.weewx_inside_temperature
-#      - sensor.weewx_inside_humidity
+      - automation.daily_weather_report
     title: Weather Station
+    show_header_toggle: false
     type: entities
   - entities:
       - sun.sun
       - sensor.weewx_solar_altitude
       - sensor.moon
     title: Environment
+    show_header_toggle: false
     type: entities

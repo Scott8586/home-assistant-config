@@ -3,17 +3,22 @@ icon: mdi:thermometer-lines
 path: sensors
 cards:
   - entities:
-      - entity: sensor.bme680_sensor_temperature
-      - entity: sensor.bme680_sensor_humidity
-      - entity: sensor.bme680_sensor_sealevel_pressure
-      - entity: sensor.bme680_sensor_air_quality
-    title: Loft BME680
+    - entity: sensor.loft_temperature
+    - entity: sensor.loft_humidity
+    - entity: sensor.loft_pressure
+    title: Loft BME280
     type: entities
   - entities:
-      - entity: sensor.garage_temperature
-      - entity: sensor.garage_humidity
-      - entity: sensor.garage_pressure
-      - entity: sensor.garage_sealevel_pressure
+    - entity: sensor.garage_temperature
+    - entity: sensor.garage_humidity
+    - entity: sensor.garage_pressure
+    - entity: sensor.garage_sealevel_pressure
     title: Garage BME280
     type: entities
-
+  - entities:
+    - entity: sensor.living_room_temperature
+    - entity: sensor.living_room_humidity
+    - entity: sensor.living_room_eco2
+    - entity: sensor.living_room_iaq
+    title: Living Room BME680
+    type: entities

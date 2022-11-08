@@ -1,0 +1,27 @@
+# Check temp sensors 
+id: 'checktempsensors'
+alias: 'Check Temperature Sensors'
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.garage_chiller_battery
+      - sensor.wine_chiller_battery
+      - sensor.kitchen_freezer_battery
+      - sensor.garage_clock_battery
+      - sensor.desk_clock_battery
+    below: 10
+    # Reduce flapping
+    for:
+      minutes: 60
+  - platform: numeric_state
+    entity_id:
+      - sensor.garage_chiller_sensor_age
+      - sensor.wine_chiller_sensor_age
+      - sensor.kitchen_freezer_sensor_age
+    # Seconds for timeout - 2hrs
+    above: 7200 
+action:
+  service: !secret telegram_notify
+  data_template:        
+    message: "W: Check Sensor: {{ trigger.to_state.attributes.friendly_name }}"
+

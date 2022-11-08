@@ -1,0 +1,24 @@
+# Check Garage doors
+id: 'checkgaragedoors'
+alias: "N: Check Garage Doors"
+initial_state: 'on'
+trigger:
+  platform: time
+  at: '21:30:00'
+condition:
+  condition: or
+  conditions:
+    - condition: state
+      entity_id: cover.vs_front_door_1
+      state: 'open'
+    - condition: state
+      entity_id: cover.vs_front_door_2
+      state: 'open'
+    - condition: state
+      entity_id: cover.vs_rear_door
+      state: 'open'
+action:
+  - service: !secret telegram_notify
+    data:
+      message: "A garage door is open"
+

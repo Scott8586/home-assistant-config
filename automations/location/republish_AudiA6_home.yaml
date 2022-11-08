@@ -1,0 +1,21 @@
+id: 'republishAudiA6Home'
+alias: 'L: Audi A6 Home to MQTT'
+trigger:
+  platform: state
+  entity_id: device_tracker.audi_a6_ibeacon_tracker
+  to: 'home'
+action:
+  - service: mqtt.publish
+    data_template:
+      topic: 'location/car/audi_a6_gps'
+      retain: false
+      payload:
+              '
+                  {"battery_level":100,
+                  "longitude":{{ states.zone.vistasea.attributes.longitude }},
+                  "latitude":{{ states.zone.vistasea.attributes.latitude }},
+                  "gps_accuracy":100,
+                  "tst": {{ as_timestamp(now()) | int }},
+                  "_type":"location",
+                  "tid":"sc"}
+              '

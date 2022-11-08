@@ -1,0 +1,20 @@
+# Technology/Band connection change - 3G or LTE
+id: 'cellradiobandchange'
+alias: 'N: Cell Radio Band Change'
+trigger:
+  platform: state
+  entity_id: sensor.mofi4500_lte_band
+condition:
+  condition: and       
+  conditions:                                                        
+    - condition: template                                            
+      value_template: '{{ trigger.to_state.state != "unavailable" }}'         
+    - condition: template                                            
+      value_template: '{{ trigger.from_state.state != "unavailable" }}'         
+    - condition: template                                            
+      value_template: '{{ trigger.to_state.state != trigger.from_state.state }}'         
+action:     
+  service: !secret telegram_notify
+  data_template:
+    message: "{{ trigger.to_state.name }} is {{ trigger.to_state.state }}"
+

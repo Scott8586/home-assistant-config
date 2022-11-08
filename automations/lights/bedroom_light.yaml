@@ -1,0 +1,10 @@
+id: 'readinglight'
+alias: 'Reading Light'
+trigger:
+  - platform: state
+    entity_id: schedule.bedroom_light
+action:
+  - service: >
+      switch.turn_{{ trigger.to_state.state }}
+    entity_id: switch.bedroom_light
+

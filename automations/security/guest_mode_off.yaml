@@ -1,0 +1,18 @@
+id: 'guestmodeoff'                                                                    
+alias: "Guest Mode Off"
+trigger:
+  - platform: state
+    entity_id: input_boolean.guest_mode
+    from: 'on'
+    to: 'off'
+condition:
+  condition: state
+  entity_id: binary_sensor.both_away
+  state: 'on'
+action:                                                                   
+  - service: rest_command.hm_command
+    data_template:                                                           
+      mode: 4
+  - service: !secret telegram_notify
+    data_template:                                                             
+      message: Guest mode off, enter Vaction mode 

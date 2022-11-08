@@ -1,0 +1,14 @@
+# LTE Usage Report
+id: 'lteusagereport'
+alias: "N: LTE Usage Report"
+trigger:
+  platform: event
+  event_type: telegram_command
+  event_data:
+    command: '/usage'
+action:
+  - service: !secret telegram_notify
+    data_template:
+      message: | 
+       24 Hour LTE Usage: {{ states('sensor.mofi4500_lte_statistics') | round(0) }} MiB
+       Monthy LTE Usage: {{ states('sensor.mofi4500_lte_usage_gb') | round(0) }} GiB

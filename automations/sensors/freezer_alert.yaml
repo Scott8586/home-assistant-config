@@ -1,0 +1,14 @@
+# Freezer temp alert 
+id: 'freezertempalert'
+alias: 'Freezer Temperature Alert'
+trigger:
+  - platform: numeric_state
+    entity_id:
+      - sensor.kitchen_freezer_temperature
+    above: 25
+    for:
+      minutes: 30
+action:
+  service: !secret telegram_notify
+  data_template:        
+    message: "N: High Freezer Temperature: {{ trigger.to_state.state }}F"

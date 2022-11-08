@@ -1,0 +1,27 @@
+id: 'frontyardsnapshot'
+alias: 'N: Front Yard Snapshot'
+mode: single # Only run once at a time  
+max_exceeded: silent # Hide warnings when triggered while in delay.
+trigger:
+  platform: state
+  entity_id:
+   - binary_sensor.vs_front_yard_motion
+  to: 'on'
+action:
+#  - delay: '15'
+#  - service: unifiprotect.save_thumbnail_image
+  - service: camera.snapshot
+    data:
+      entity_id: camera.vs_front_yard_high
+      filename: "/config/www/snapshots/vs_front_yard.png"
+#  - service: !secret telegram_notify
+#    data_template:
+#      message: "Front Yard Motion"
+#  - service: !secret telegram_notify
+#    data:
+#      title: ''
+#      message: ''
+#      data:
+#        photo:
+#        - file: "/config/www/snapshots/vs_front_yard.png"
+#          caption: "Front Door {{now().strftime('%H:%M %d-%m-%Y')}}"

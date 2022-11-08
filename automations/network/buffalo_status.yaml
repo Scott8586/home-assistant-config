@@ -1,0 +1,22 @@
+# buffalo LED status
+id: 'buffalostatus'
+alias: 'Buffalo LED Status'
+trigger:
+  platform: state
+  entity_id: sensor.massive_chambray_buffalo_led
+condition:
+  condition: and
+  conditions:
+    - condition: template
+      value_template: '{{ trigger.from_state.state != "unavailable" }}'
+    - condition: template
+      value_template: "{{ trigger.to_state.state != trigger.from_state.state }}"
+action:
+  service: !secret telegram_notify
+  data_template:
+    message: >
+      {% if trigger.to_state.state == "lime" %} 
+        N: {{ trigger.to_state.name }} is Active
+      {% else %}
+        N: {{ trigger.to_state.name }} state is {{trigger.to_state.state}}
+      {% endif %}

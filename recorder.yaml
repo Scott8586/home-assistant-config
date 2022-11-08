@@ -1,7 +1,7 @@
 purge_keep_days: 30
 exclude:
   domains:
-  - automation
+#  - automation
   - weblink
   - updater
   - media_player
@@ -9,11 +9,7 @@ exclude:
   - sun.sun # Don't record sun data
   - sensor.moon
   - sensor.last_boot # Comes from 'systemmonitor' sensor platform
+  - sensor.current_date_time
   - sensor.time
-  - binary_sensor.netgear_lte_mobile_connected
-  - sensor.netgear_lte_radio_quality
-  - sensor.netgear_lte_connection_text
-  - sensor.upstairs_ups_battery_minutes
-  - sensor.upstairs_ups_battery_runtime
   - sensor.erx_wan_in
   - sensor.erx_wan_out

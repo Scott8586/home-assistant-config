@@ -23,12 +23,12 @@ cards:
       type: entities                               
       entities:                                    
         - type: custom:multiple-entity-row
-          entity: sensor.loft_humidity
+          entity: sensor.weewx_loft_humidity
           name: Loft
           icon: mdi:home-thermometer
           state_header: Humid
           entities:
-            - entity: sensor.loft_temperature
+            - entity: sensor.weewx_loft_temperature
               name: Temp
         - type: custom:multiple-entity-row         
           entity: sensor.installed_version         
@@ -57,7 +57,7 @@ cards:
                 --paper-item-icon-color: rgb(255, 165, 0);                                                           
               {% endif %};                                                                                           
             }                                                                                                        
-        - entity: sensor.home_assistant_v2_db                                                                        
+        - entity: sensor.home_assistant_v2_db_size
           icon: mdi:database                              
         - type: custom:bar-card                                                                                      
           columns: 2                                                                                                 
@@ -74,7 +74,7 @@ cards:
             - entity: sensor.swap_use_percent                                                                      
               name: Swap                                                                                              
               icon: mdi:memory                                                                                       
-            - entity: sensor.cpu_temperature                                                                         
+            - entity: sensor.processor_temperature_c
               name: Temp                                                                                             
               icon: mdi:thermometer                                                                                  
             - entity: sensor.disk_use_percent                                                                        
@@ -99,7 +99,7 @@ cards:
             bar-card-value {                              
               text-shadow: 1px 1px 5px black;             
             }
-    type: 'custom:vertical-style-card'                    
+    type: vertical-stack
     style:                                                
       font_size: 24px                                     
       border: true                                        
@@ -112,24 +112,55 @@ cards:
           url_path: http://hub.tworoads.net/gpsd.php?host=192.168.32.157       
       - entity: automation.gps_radio_fix_change
       - entity: sensor.raspi_livingroom_vs_cpu_temperature
-      - entity: sensor.room_assistant_livingroom
       - entity: sensor.raspi_garage_vs_cpu_temperature
-      - entity: sensor.room_assistant_garage
-  - entities:
-      - sensor.ups_status
-      - sensor.ups_battery_charge
-      - sensor.ups_load
-      - sensor.ups_input_voltage
-      - sensor.ups_battery_minutes
-    title: Loft UPS Status
-    type: entities
-  - entities:
+      - type: custom:secondaryinfo-entity-row
+        entity: sensor.room_assistant_loft
+        secondary_info: "Cluster: [[ sensor.loft_cluster_leader ]]"
+      - type: custom:secondaryinfo-entity-row
+        entity: sensor.room_assistant_livingroom
+        secondary_info: "Cluster: [[ sensor.livingroom_cluster_leader ]]"
+      - type: custom:secondaryinfo-entity-row
+        entity: sensor.room_assistant_master
+        secondary_info: "Cluster: [[ sensor.master_cluster_leader ]]"
+      - type: custom:secondaryinfo-entity-row
+        entity: sensor.room_assistant_garage
+        secondary_info: "Cluster: [[ sensor.garage_cluster_leader ]]"
+  - type: entities                                                      
+    title: Mofi 4500 LTE Modem              
+    entities:
       - entity: sensor.mofi4500_lte_rsrp
       - entity: sensor.mofi4500_lte_rsrq
       - entity: sensor.mofi4500_lte_band
       - entity: sensor.mofi4500_lte_usage_gb
-    title: Mofi 4500 LTE Modem
-    type: entities
+  - cards:
+    - cards:
+        - entity: sensor.ups_battery_minutes
+          max: 100
+          min: 0
+          name: UPS Battery Minutes
+          severity:
+            red: 0          
+            yellow: 10
+            green: 30
+          theme: default
+          type: gauge
+        - entity: sensor.ups_load
+          max: 100
+          min: 0
+          name: UPS Load
+          severity:
+            green: 0
+            yellow: 25
+            red: 50
+          theme: default
+          type: gauge
+      type: horizontal-stack
+    - entities:
+        - sensor.ups_status
+        - sensor.ups_input_voltage
+      type: entities
+    title: Loft UPS
+    type: vertical-stack
   - title: Vistasea Pi-hole
     type: entities
     entities:
@@ -141,3 +172,10 @@ cards:
           secondary_info: "[[ sensor.vistasea_pi_hole_dns_unique_clients ]] unique clients"
         - entity: sensor.vistasea_pi_hole_dns_queries_today
           name: Number of DNS requests today
+  - title: Wifi Status
+    type: entities
+    entities:
+      - entity: sensor.2g_wifi_count
+      - entity: sensor.5g_wifi_count
+      - entity: sensor.guest_wifi_count
+

@@ -1,0 +1,12 @@
+- name: Home
+  entities:
+    switch.garage_alexa: "on"
+    switch.loft_a_v: "on"
+    switch.livingroom_alexa: "on"
+    switch.hall_light_159: "on"
+- name: Vacation
+  entities:
+    switch.garage_alexa: "off"
+    switch.loft_a_v: "off"  
+    switch.livingroom_alexa: "off"
+    switch.hall_light_159: "off"

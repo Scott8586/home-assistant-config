@@ -1,16 +1,49 @@
 #title: Media
-icon: mdi:library-music
+icon: mdi:music
 path: media
-theme: default
-badges: []
 cards:
-  - entity: media_player.living_room
-    type: media-control
-  - entity: media_player.kitchen
-    type: media-control
-  - entity: media_player.dining_room
-    type: media-control
-  - entity: media_player.patio
-    type: media-control
-  - entity: media_player.den
-    type: media-control
+  - type: entities
+    title: A/V Power
+    show_header_toggle: false
+    state_color: true
+    entities:
+      - switch.loft_a_v
+      - switch.livingroom_alexa
+      - switch.garage_alexa
+  - type: 'custom:mini-media-player'
+    entity: media_player.kitchen
+    hide:
+      power: true
+    speaker_group:
+      platform: sonos
+      show_group_count: true
+      entities:
+        - entity_id: media_player.family_room
+          name: Sonos Family Room
+        - entity_id: media_player.dining_room
+          name: Sonos Dining Room
+    entities:
+      - type: 'custom:mini-media-player'
+        entity: media_player.multiroom_player
+        group: true
+        source: icon
+        artwork: cover
+        info: short
+        hide:
+          volume: true
+          power: true
+      - type: 'custom:mini-media-player'
+        entity: media_player.kitchen
+        group: true
+        hide:
+          controls: true
+      - type: 'custom:mini-media-player'
+        entity: media_player.family_room
+        group: true
+        hide:
+          controls: true
+      - type: 'custom:mini-media-player'
+        entity: media_player.dining_room
+        group: true
+        hide:
+          controls: true

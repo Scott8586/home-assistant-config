@@ -37,6 +37,15 @@ sensor.bme680_sensor_air_quality:
   icon: mdi:blur
   friendly_name: Air Quality
   device_class: pm25
-  unit_of_measurement: "%"
+  unit_of_measurement: '%'
 weather.dark_sky:
   friendly_name: 'Dark Sky: Grapeview'
+device_tracker.audi_a6_gps:
+  friendly_name: Audi A6
+  icon: mdi:car
+device_tracker.audi_q7_gps:
+  friendly_name: Audi Q7
+  icon: mdi:car
+device_tracker.toyota_rav4_gps:
+  friendly_name: Toyota Rav4
+  icon: mdi:car

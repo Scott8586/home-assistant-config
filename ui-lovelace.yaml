@@ -3,8 +3,9 @@ custom_header:
 title: Vistasea
 views:
   - !include /config/lovelace/vistasea/views/home.yaml
+  - !include /config/lovelace/vistasea/views/helium_ops.yaml
+  - !include /config/lovelace/vistasea/views/media.yaml
   - !include /config/lovelace/vistasea/views/weather.yaml
-#  - !include /config/lovelace/vistasea/views/media.yaml
   - !include /config/lovelace/vistasea/views/net_ops.yaml
   - !include /config/lovelace/vistasea/views/tracking.yaml
   - !include /config/lovelace/vistasea/views/sensors.yaml

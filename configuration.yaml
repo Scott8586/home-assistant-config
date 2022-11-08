@@ -10,6 +10,8 @@ homeassistant:
   unit_system: imperial
   # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   time_zone: America/Los_Angeles
+  # Currency:
+  currency: USD
   # Customization file
   customize: !include customize.yaml
   customize_glob: !include customize_glob.yaml
@@ -27,6 +29,9 @@ discovery:
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 # http:
 #   base_url: example.duckdns.org:8123
+http:
+  ssl_certificate:    !secret ssl_certificate
+  ssl_key:            !secret ssl_key
 
 #netgear_lte:
 #  - host: !secret lte_modem_host
@@ -40,6 +45,15 @@ discovery:
 #      - rx_level
 #      - tx_level
 #      - current_band
+
+influxdb:
+  api_version: 2
+  ssl: false
+  host: 192.168.32.61
+  port: 8086
+  token: raven_tworoads_token
+  organization: tworoads.net
+  bucket: homeassistant_core
 
 telegram_bot:
 #  - platform: broadcast
@@ -70,22 +84,24 @@ device_tracker:
       srp_iphone_ios: 'location/phone/srp_iphone_ios'
       audi_a6_gps: 'location/car/audi_a6_gps'
       audi_q7_gps: 'location/car/audi_q7_gps'
+      toyota_rav4_gps: 'location/car/toyota_rav4_gps'
 
 logger:
   default: info
   logs:
     homeassistant.components.command_line.switch: warning
     homeassistant.components.automation: warning
+    #homeassistant.components.venstar: debug
     #homeassistant.config: debug
     # homeassistant.components.telegram_bot: debug
     # aiounifi: debug
     # homeassistant.components.unifi: debug
 
-climate:
-  - platform: venstar
-    host: !secret venstar_main_host
-    ssl: false
-    humidifier: false
+#climate:
+#  - platform: venstar
+#   host: !secret venstar_main_host
+#   ssl: false
+#   humidifier: false
 
 envisalink:
   host: !secret envisalink_host
@@ -126,6 +142,12 @@ envisalink:
     23:
       name: 'Garage Smoke'
       type: 'smoke'
+    27:
+      name: 'Lower Motion'
+      type: 'motion'
+    28:
+      name: 'Upper Motion'
+      type: 'motion'
     29:
       name: 'Garage Motion'
       type: 'motion'
@@ -135,63 +157,82 @@ envisalink:
     2:
       name: 'Garage Alarm'
 
+input_boolean:
+  guest_mode:
+    name: Guest Mode
+
+input_number:
+  gas_level:
+    name: Gas Level
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+
+mqtt:
+  sensor:
+    - state_topic: room-assistant/status/livingroom
+      unique_id: room_assistant_livingroom
+      name: "Room Assistant Livingroom"
+    - state_topic: room-assistant/status/loft
+      unique_id: room_assistant_loft
+      name: "Room Assistant Loft"
+    - state_topic: room-assistant/status/master
+      unique_id: room_assistant_master
+      name: "Room Assistant Master"
+    - state_topic: room-assistant/status/garage
+      unique_id: room_assistant_garage
+      name: "Room Assistant Garage"
+    - state_topic: environment/vistasea_garage/BME280_temperature
+      unique_id: garage_temperature
+      name: 'Garage Temperature'                                                   
+      unit_of_measurement: '..F'                                                   
+    - state_topic: 'environment/vistasea_garage/BME280_humidity'                   
+      unique_id: garage_humidity
+      name: 'Garage Humidity'
+    - state_topic: 'environment/vistasea_garage/BME280_pressure'                   
+      unique_id: garage_pressure
+      name: 'Garage Pressure'                                                      
+      unit_of_measurement: 'hPa'                                                   
+    - state_topic: 'environment/vistasea_garage/BME280_sealevel_pressure'          
+      unique_id: garage_sealevel_pressure
+      name: 'Garage Sealevel Pressure'                                             
+      unit_of_measurement: 'hPa'                                                   
+    - state_topic: 'environment/vistasea_master/BME280_temperature'                
+      unique_id: master_temperature
+      name: 'Master Temperature'                                                   
+      unit_of_measurement: '..F'                                                   
+    - state_topic: 'environment/vistasea_master/BME280_humidity'                   
+      unique_id: master_humidity
+      name: 'Master Humidity'                                            
+    - state_topic: 'environment/vistasea_master/BME280_pressure'         
+      unique_id: master_pressure
+      name: 'Master Pressure'                                            
+      unit_of_measurement: 'hPa'                                         
+    - state_topic: 'environment/vistasea_master/BME280_sealevel_pressure'
+      unique_id: master_sealevel_pressure
+      name: 'Master Sealevel Pressure'                                   
+      unit_of_measurement: 'hPa'                                         
+
+
 # Sensors
 sensor:
+  - platform: helium
+    hotspots:
+      - 112YavLSSEvDt1HpmABL5rPGRhNXD3ki2gttukjpbLqhjWBgHtiG
   - platform: gpsd
     name: Vistasea GPS
     host: 192.168.32.157
     scan_interval: 60
-  - platform: bme280
-    name: Loft
-    monitored_conditions:
-      - temperature
-      - humidity
-      - pressure
-  - platform: mqtt           
-    state_topic: 'room-assistant/sensor/ble-audi-a6-ibeacon/attributes'
-    value_template: '{{ value_json.rssi }}'
-    unit_of_measurement: 'm' 
-    name: 'Audi A6'          
-  - platform: mqtt           
-    state_topic: 'room-assistant/sensor/ble-audi-q7-ibeacon/attributes'
-    value_template: '{{ value_json.distance }}'
-    unit_of_measurement: 'm' 
-    name: 'Audi Q7'          
-  - platform: mqtt           
-    state_topic: 'room-assistant/sensor/ble-toyota-rav4-ibeacon/attributes'
-    value_template: '{{ value_json.distance }}'
-    unit_of_measurement: 'm' 
-    name: 'Toyota Rav4'      
-  - platform: mqtt           
-    name: "Room Assistant Livingroom"
-    state_topic: room-assistant/status/livingroom-vs
-  - platform: mqtt           
-    name: "Room Assistant Garage"
-    state_topic: room-assistant/status/garage-vs
-  - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/BME280_temperature'
-    name: 'Garage Temperature'
-    unit_of_measurement: '°F'
-  - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/BME280_humidity'
-    name: 'Garage Humidity'    
-  - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/BME280_pressure'
-    unit_of_measurement: 'hPa'
-    name: 'Garage Pressure'  
-  - platform: mqtt           
-    state_topic: 'environment/vistasea_garage/BME280_sealevel_pressure'
-    unit_of_measurement: 'hPa'
-    name: 'Garage Sealevel Pressure'
-  - platform: mqtt
-    name: bme280 Garage
-    state_topic: "environment/vistasea_garage/SENSOR"
-    value_template: "{{ value_json['BME280'].Temperature }}"
-    json_attributes_topic: "environment/vistasea_garage/SENSOR"
-    availability_topic: "environment/vistasea_garage/LWT"
-    payload_available: "Online"
-    payload_not_available: "Offline"
-    unit_of_measurement: 'F'
+#  - platform: mqtt
+#    name: bme280 Garage
+#    state_topic: "environment/vistasea_garage/SENSOR"
+#    value_template: "{{ value_json['BME280'].Temperature }}"
+#    json_attributes_topic: "environment/vistasea_garage/SENSOR"
+#    availability_topic: "environment/vistasea_garage/LWT"
+#    payload_available: "Online"
+#    payload_not_available: "Offline"
+#    unit_of_measurement: 'F'
   # Weewx Weather
   - platform: rest
     resource: http://192.168.32.157/weewx/daily.json
@@ -199,6 +240,7 @@ sensor:
     scan_interval: 150
     force_update: true
     json_attributes:
+      - time
       - current
       - almanac
     value_template: '{{ value_json.location }}'
@@ -214,6 +256,12 @@ sensor:
         '3' : 'Night',
         '4' : 'Vacation' } %}
       {{ mapper[value] }}
+  - platform: rest
+    name: "Massive Chambray Buffalo LED"
+    unique_id: massive_chambray_buffalo_led
+    scan_interval: 300 # 5 min
+    resource: !secret bobcat_led
+    value_template: "{{value_json.led}}"
   # Local System monitor
   - platform: systemmonitor
     resources:
@@ -224,116 +272,10 @@ sensor:
       - type: processor_use
       - type: load_1m
       - type: last_boot
-  # Template      
-  - platform: template
-    sensors:
-      # Internet in mbps from erx SNMP, transformed by derivative
-      internet_in_mbps:
-        friendly_name: "Internet WAN In"
-        unit_of_measurement: 'Mbps'
-        value_template: "{{ [((states('sensor.erx_wan_in_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
-        icon_template: mdi:download-network
-      internet_out_mbps:
-        friendly_name: "Internet WAN Out"
-        unit_of_measurement: 'Mbps'
-        value_template: "{{ [((states('sensor.erx_wan_out_derivative') | float * 8) / 1000000) | round(2), 0] | max }}"
-        icon_template: mdi:upload-network
-      ups_battery_minutes:
-        friendly_name: "UPS Battery Minutes"
-        value_template: "{{ ((states('sensor.ups_battery_runtime')) | float / 60) | round(0) }}"
-        unit_of_measurement: "min"
-      downstairs_thermostat_temperature:
-        friendly_name: Downstairs Temperature                               
-        value_template: "{{ state_attr('climate.main_floor', 'current_temperature') }}"
-        unit_of_measurement: "..F"          
-      weewx_outside_temperature:
-        friendly_name: Outside Temperature
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['outTemp'] }}"
-        unit_of_measurement: '°F'
-      weewx_inside_temperature:
-        friendly_name: Inside Temperature
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['inTemp'] }}"
-        unit_of_measurement: '°F'
-      weewx_outside_humidity:
-        friendly_name: Outside Humidity
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['outHumidity'] }}"
-      weewx_inside_humidity:
-        friendly_name: Inside Humidity
-        icon_template: mdi:water-percent
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['inHumidity'] }}"
-      weewx_wind_speed:
-        friendly_name: Wind Speed
-        icon_template: mdi:weather-windy 
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['windSpeed'] }}"
-        unit_of_measurement: 'mph'
-      weewx_wind_direction_ordinal:
-        friendly_name: Wind Direction
-        icon_template: mdi:weather-windy
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['windDirText'] }}"
-      weewx_outside_dewpoint:                                                                                 
-        friendly_name: Outside Dewpoint                                                                       
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['dewpoint'] }}"                        
-        unit_of_measurement: "°F"                                                                             
-      weewx_outside_windchill:                                                                                 
-        friendly_name: Outside Windchill
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['windchill'] }}"                        
-        unit_of_measurement: "°F"                                                                              
-      weewx_outside_heat_index:                                                                                 
-        friendly_name: Outside Heat Index
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['heatindex'] }}"                        
-        unit_of_measurement: "°F"                                                                              
-      weewx_garage_temperature:                                                                                 
-        friendly_name: Garage Temperature                                                                       
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraTemp1'] }}"                        
-        unit_of_measurement: "°F"                                                                              
-#      weewx_garage_humidity:                                                                                     
-#        friendly_name: Garage Humidity                                                                           
-#        value_template: "{{ states.sensor.weewx_weather.attributes.current['extraHumid1'] }}"                 
-      weewx_cloudbase:                                                             
-        friendly_name: Cloudbase
-        value_template: "{{ states.sensor.weewx_weather.attributes.current['cloudbase'] }}"   
-        unit_of_measurement: "ft"
-      weewx_solar_altitude:
-        friendly_name: Solar Altitude
-        value_template: "{{ state_attr('sun.sun', 'elevation') }}"
-        unit_of_measurement: '°'
-      # http://www.csgnetwork.com/barcorrecthcalc.html - vistasea correction 1.1
-      bme680_sensor_sealevel_pressure:
-        friendly_name: Sealevel Pressure
-        icon_template: mdi:gauge
-        value_template: "{{ ((states('sensor.bme680_sensor_pressure')) | float + 1.1) | round(1) }}"
-        unit_of_measurement: 'mb'
-      last_boot_date_time:
-        friendly_name: "Last Boot"
-        value_template: '{{ states.sensor.last_boot.state.split("T")[0] }}'
-      current_date_time:
-        friendly_name: "Current Date/Time"
-        value_template: >
-          {% set x = states('sensor.time') %}
-          {{ now().strftime("%A, %B %e") + now().strftime(", %-I:%M %p")}}
-      mofi4500_lte_usage_gb:
-        friendly_name: Mofi4500 Data Usage
-        unit_of_measurement: 'GiB'
-        value_template: "{{ ( states('sensor.mofi4500_lte_usage') | float / 1024) | round(2) }}"
+      - type: processor_temperature
 #  - platform: noaa_tides
 #    station_id: 9446489
- # CPU Temperature of pi
-  - platform: command_line
-    name: CPU Temperature
-    command: "cat /sys/class/thermal/thermal_zone0/temp"
-    value_template: "{{ value | multiply(0.001) | float | round(0) }}"
-#    value_template: "{{ (value | multiply(0.0018) + 32) | float | round(2) }} °F"
-    unit_of_measurement: " °C" # unit of measurement is for knowing the incoming units, not for units presentation
-  - platform: filesize
-    file_paths:
-      - /config/home-assistant_v2.db
-  - platform: version
-    name: latest_available_version
-    source: hassio
-  - platform: version
-    name: installed_version
 # Time and date
-  - platform: uptime
   - platform: time_date
     display_options:
       - 'time'
@@ -386,14 +328,16 @@ sensor:
     scan_interval: 27
     value_template: '{{value | float}}'
   - platform: snmp
-    host: 192.168.30.1
+#    host: 192.168.30.1
+    host: 192.168.32.254
     version: 2c
     name: Mofi4500 LTE Usage
     scan_interval: 23
     unit_of_measurement: 'MiB'
-    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.7.101.1
+#    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.7.101.1
+    baseoid: 1.3.6.1.4.1.8072.1.3.2.4.1.2.10.119.97.110.95.117.115.97.103.101.0.1 
     accept_errors: true
-    value_template: '{{value | float}}'
+    value_template: '{{value | float(default=0)}}'
   - platform: snmp
     name: erx_wan_in
     host: 192.168.32.254
@@ -433,11 +377,43 @@ sensor:
   - platform: statistics
     name: mofi4500_lte_statistics
     entity_id: sensor.mofi4500_lte_usage
+    state_characteristic: change
     sampling_size: 28800
-    max_age: 24:00:00
-
-# Add the moon
-  - platform: moon
+    max_age:
+      hours: 24
+  - platform: history_stats
+    name: Heat Pump Duty Cycle
+    entity_id: binary_sensor.heat_pump_status
+    state: "on"
+    type: ratio
+    #start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+  - platform: history_stats
+    name: Heat Pump Time On
+    entity_id: binary_sensor.heat_pump_status
+    state: "on"
+    type: time
+    #start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+  - platform: history_stats
+    name: Heat Pump On Count
+    entity_id: binary_sensor.heat_pump_status
+    state: "on"                                                   
+    type: count
+    #start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+  - platform: integration                 
+    source: sensor.ups_current_power                                      
+    name: UPS Current Energy
+    unit_prefix: k              
+    unit_time: h                                                                                
+    round: 2                      
 
 switch:
   - platform: command_line
@@ -447,6 +423,27 @@ switch:
         command_off: !secret vistasea_pihole_disable
         command_state: !secret vistasea_pihole_status
         value_template: "{{ value_json.status == 'enabled' }}"
+
+utility_meter:                                                                   
+  daily_energy:                            
+    source: sensor.house_total_energy
+    cycle: daily                         
+  monthly_energy:    
+    source: sensor.house_total_energy
+    cycle: monthly         
+
+input_select:
+  home_status:
+    name: Home Status
+    options:
+      - Home
+      - Arrived
+      - Left
+      - Away
+      - Night
+      - Guest
+      - Vacation
+    initial: Home
 
 # NWS weather
 #weather:
@@ -485,17 +482,23 @@ lovelace:
       type: module
     - url: /hacsfiles/mini-media-player/mini-media-player-bundle.js
       type: module
-    - url: /local/vertical-style-card.js
-      type: js
+    - url: /hacsfiles/compass-card/compass-card.js                   
+      type: module
+    - url: /hacsfiles/battery-state-card/battery-state-card.js
+      type: module
 
 frontend:
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/card-mod.js
 
 history: !include history.yaml
 recorder: !include recorder.yaml
-#group: !include groups.yaml
+group: !include groups.yaml
 zone: !include zones.yaml
-binary_sensor: !include binary_sensors.yaml
+#binary_sensor: !include binary_sensors.yaml
 automation: !include automations.yaml
 automation split: !include_dir_list automations
+template: !include templates.yaml
 rest_command: !include rest.yaml
+scene: !include scenes.yaml
 script: !include scripts.yaml

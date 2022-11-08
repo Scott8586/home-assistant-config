@@ -3,10 +3,14 @@ icon: mdi:thermometer-lines
 path: sensors
 cards:
   - entities:
-    - entity: sensor.loft_temperature
-    - entity: sensor.loft_humidity
-    - entity: sensor.loft_pressure
+    - entity: sensor.weewx_loft_temperature
+    - entity: sensor.weewx_loft_humidity
     title: Loft BME280
+    type: entities
+  - entities:
+    - entity: sensor.garage_clock_temperature
+    - entity: sensor.garage_clock_humidity
+    title: Garage Workshop Clock
     type: entities
   - entities:
     - entity: sensor.garage_temperature
@@ -16,9 +20,43 @@ cards:
     title: Garage BME280
     type: entities
   - entities:
+    - entity: sensor.master_temperature
+    - entity: sensor.master_humidity
+    - entity: sensor.master_pressure
+    - entity: sensor.master_sealevel_pressure
+    title: Master Bedroom BME280
+    type: entities
+  - entities:
     - entity: sensor.living_room_temperature
     - entity: sensor.living_room_humidity
     - entity: sensor.living_room_eco2
     - entity: sensor.living_room_iaq
     title: Living Room BME680
     type: entities
+  - title: Kitchen Freezer
+    type: entities
+    entities:
+      - entity: sensor.kitchen_freezer_temperature
+      - entity: sensor.kitchen_freezer_humidity
+  - title: Wine Chiller
+    type: entities
+    entities:
+      - entity: sensor.wine_chiller_temperature
+      - entity: sensor.wine_chiller_humidity
+  - title: Garage Chiller
+    type: entities
+    entities:
+      - entity: sensor.garage_chiller_temperature
+      - entity: sensor.garage_chiller_humidity
+  - type: custom:battery-state-card                                                    
+    title: Battery Levels                                                              
+    color_gradient:                                                                    
+      - red                                                                            
+      - yellow                                                                         
+      - green                                                                          
+    entities:                                                                          
+      - entity: sensor.kitchen_freezer_battery                                         
+      - entity: sensor.wine_chiller_battery                                       
+      - entity: sensor.garage_chiller_battery                                     
+      - entity: sensor.garage_clock_battery                                       
+      - entity: sensor.desk_clock_battery                                         

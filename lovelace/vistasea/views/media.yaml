@@ -7,9 +7,12 @@ cards:
     show_header_toggle: false
     state_color: true
     entities:
-      - switch.loft_a_v
-      - switch.livingroom_alexa
-      - switch.garage_alexa
+      - switch.zb_garage_a_v
+      - switch.zb_kitchen_a_v
+      - switch.zb_livingroom_a_v
+      - switch.zb_loft_a_v
+#      - switch.livingroom_alexa
+#      - switch.garage_alexa
   - type: 'custom:mini-media-player'
     entity: media_player.kitchen
     hide:

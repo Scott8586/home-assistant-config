@@ -48,6 +48,11 @@ cards:
     entities:
       - entity: sensor.garage_chiller_temperature
       - entity: sensor.garage_chiller_humidity
+  - title: Pump Room
+    type: entities
+    entities:
+      - entity: sensor.pump_room_temperature
+      - entity: sensor.pump_room_humidity
   - type: custom:battery-state-card                                                    
     title: Battery Levels                                                              
     color_gradient:                                                                    
@@ -60,3 +65,4 @@ cards:
       - entity: sensor.garage_chiller_battery                                     
       - entity: sensor.garage_clock_battery                                       
       - entity: sensor.desk_clock_battery                                         
+      - entity: sensor.pump_room_battery                                         

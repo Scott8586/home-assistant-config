@@ -1,0 +1,10 @@
+# Daily WAN usage report
+id: 'dailywanusagereport'
+alias: 'N: Daily WAN Usage report'
+trigger:
+  platform: time
+  at: '06:00:00'
+action:
+  service: automation.trigger
+  entity_id: automation.wan_usage_report
+

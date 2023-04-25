@@ -1,0 +1,11 @@
+# buffalo POC change
+id: 'buffalopoc'
+alias: 'N: Buffalo POC Change'
+trigger:
+  platform: numeric_state
+  entity_id: sensor.massive_chambray_buffalo_update
+  below: 15
+action:
+  service: !secret telegram_notify
+  data_template:
+    message: "N: Buffalo POC event!"

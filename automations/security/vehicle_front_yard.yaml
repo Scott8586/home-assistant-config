@@ -1,11 +1,11 @@
 id: 'vehiclefrontyard'
-alias: 'Vehicle Front Yard'
+alias: 'N: Vehicle Front Yard'
 mode: single
 max_exceeded: silent
 trigger:
   platform: state
-  entity_id: sensor.vs_front_yard_detected_object
-  to: 'vehicle'
+  entity_id: binary_sensor.vs_front_yard_vehicle_detected
+  to: 'on'
 action:
 #  - service: camera.snapshot
 #    data:

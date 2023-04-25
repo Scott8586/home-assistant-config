@@ -1,0 +1,15 @@
+# buffalo OTA Version
+id: 'buffaloOTAversion'
+alias: 'N: Buffalo OTA Version'
+trigger:
+  platform: state
+  entity_id: sensor.massive_chambray_buffalo_ota_version
+condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unknown' }}"
+action:
+  service: !secret telegram_notify
+  data_template:
+    message: "N: {{ trigger.to_state.name }} is {{ trigger.to_state.state }}"

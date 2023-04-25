@@ -3,8 +3,12 @@ alias: 'Reading Light'
 trigger:
   - platform: state
     entity_id: schedule.bedroom_light
+condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unavailable' }}"
+  - condition: template
+    value_template: "{{ trigger.to_state.state != 'unknown' }}"
 action:
   - service: >
       switch.turn_{{ trigger.to_state.state }}
-    entity_id: switch.bedroom_light
-
+    entity_id: switch.zb_reading_light

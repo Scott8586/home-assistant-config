@@ -9,6 +9,7 @@ trigger:
       - sensor.kitchen_freezer_battery
       - sensor.garage_clock_battery
       - sensor.desk_clock_battery
+      - sensor.pump_room_battery
     below: 10
     # Reduce flapping
     for:
@@ -18,6 +19,7 @@ trigger:
       - sensor.garage_chiller_sensor_age
       - sensor.wine_chiller_sensor_age
       - sensor.kitchen_freezer_sensor_age
+      - sensor.pump_room_sensor_age
     # Seconds for timeout - 2hrs
     above: 7200 
 action:

@@ -13,8 +13,8 @@ ota:
   password: "043cb88f28fb6f0ab5ff63ea01a82134"
 
 wifi:
-  ssid: "srp-vistasea"
-  password: "kicker87"
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -45,12 +45,38 @@ bme680_bsec:
   address: 0x77
   
 sensor:
+  - platform: uptime
+    name: Living Room 680 Uptime Second
+    id: uptime_sensor
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              return (
+                (days ? String(days) + "d " : "") +
+                (hours ? String(hours) + "h " : "") +
+                (minutes ? String(minutes) + "m " : "") +
+                (String(seconds) + "s")
+              ).c_str();
+
+
   - platform: bme680_bsec
     temperature:
+      id: living_room_temperature
       name: "Living Room Temperature"
     pressure:
       name: "Living Room Pressure"
     humidity:
+      id: living_room_humidity
       name: "Living Room Humidity"
     iaq:
       name: "Living Room IAQ"
@@ -59,7 +85,55 @@ sensor:
     breath_voc_equivalent:
       name: "Living Room eVOC"
 
+  - platform: template
+    name: "Living Room DewPoint"
+    id: living_room_dewpoint
+    lambda: |-
+      return (243.5*(log(id(living_room_humidity).state/100)+((17.67*id(living_room_temperature).state)/
+      (243.5+id(living_room_temperature).state)))/(17.67-log(id(living_room_humidity).state/100)-
+      ((17.67*id(living_room_temperature).state)/(243.5+id(living_room_temperature).state))));
+    unit_of_measurement: °C
+    update_interval: 60s
+    icon: 'mdi:water-thermometer'
+
+  - platform: wifi_signal
+    name: "Living Room 680 WiFi Signal"
+    update_interval: 60s
+
+# Example configuration entry
+button:
+  - platform: restart
+    name: "Living Room 680 Restart"
+
 text_sensor:
   - platform: bme680_bsec
     iaq_accuracy:
       name: "Living Room IAQ Accuracy"
+      
+  - platform: template
+    name: Living Room Comfort Level
+    lambda: |-
+      if (id(living_room_dewpoint).state > 23.9) {
+        return {"Miserable"};
+      } else if (id(living_room_dewpoint).state > 21.1) {
+        return {"Oppresive"};
+      } else if (id(living_room_dewpoint).state > 18.3) {
+        return {"Uncomfortable"};
+      } else if (id(living_room_dewpoint).state > 15.6) {
+        return {"Sticky"};
+      } else if (id(living_room_dewpoint).state > 12.8) {
+        return {"Comfortable"};
+      } else if (id(living_room_dewpoint).state > 10.0) {
+        return {"Pleasant"};
+      } else if (id(living_room_dewpoint).state > 0) {
+        return {"Dry"};
+      } else {
+        return {"Undefined"};
+      }
+    icon: "mdi:water-percent"
+    update_interval: 60s
+
+  - platform: template
+    name: Living Room 680 Uptime
+    id: uptime_human
+    icon: mdi:clock-start

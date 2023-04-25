@@ -1,0 +1,218 @@
+substitutions:
+# Change the disp_name to something you want  
+  disp_name: Thor
+# Interval of how often the power is updated
+  update_time: 10s
+
+esphome:
+  name: thor-6chan32
+  platform: ESP32
+  board: nodemcu-32s
+   
+wifi:
+  ssid: "srp-vistasea"
+  password: "kicker87"
+
+mqtt:
+  broker: 192.168.32.161
+  username: "moe"
+  password: "kicker87"
+
+# Enable logging
+logger:
+
+#api:
+
+ota:
+
+web_server:
+  port: 80
+
+spi:
+  clk_pin: 18
+  miso_pin: 19
+  mosi_pin: 23
+
+sensor:
+  - platform: wifi_signal
+    name: ${disp_name} WiFi
+    update_interval: 60s
+  - platform: atm90e32
+    cs_pin: 5
+    # Note: if you are using an expansion board, refer to the top physical jumper pins to determine the correct cs_pin numbers.
+    # Replicate the platform: atm90e3 section, change the cs_pin and finally update the CT#s for your expansion boaard. 
+    phase_a:
+      voltage:
+        name: ${disp_name} Volts A
+        id: ic1Volts
+        accuracy_decimals: 1
+#        filters:
+#          - multiply: 2.0
+      current:
+        name: ${disp_name} CT1 Amps
+        id: ct1Amps
+      gain_voltage: 7305
+# Voltage using a 9VAC power transformer
+# Note: If you can not get the voltage correct with the highest gain of 65535, uncomment the 2.0 multiply filter above and lower the gain as needed
+      gain_ct: 41787
+# Current calibration using a 120A/40ma SCT-016
+    phase_b:
+      current:
+        name: ${disp_name} CT2 Amps
+        id: ct2Amps
+      gain_ct: 41787
+# Current calibration using a 120A/40ma SCT-016
+#    phase_c:
+#      current:
+#        name: ${disp_name} CT3 Amps
+#        id: ct3Amps
+#      gain_ct: 32498
+# Current calibration using a 100A/50ma SCT-013-000
+    frequency:
+      name: ${disp_name} Freq A
+    line_frequency: 60Hz
+    gain_pga: 1X
+    update_interval: ${update_time}
+  - platform: atm90e32
+    cs_pin: 4
+    phase_a:
+      voltage:
+        name: ${disp_name} Volts B
+        id: ic2Volts
+        accuracy_decimals: 1
+      current:
+        name: ${disp_name} CT4 Amps
+        id: ct4Amps
+      gain_voltage: 7305
+      gain_ct: 27518
+# Current calibration using a 100A/50ma SCT-013-000
+    phase_b:
+      current:
+        name: ${disp_name} CT5 Amps
+        id: ct5Amps
+      gain_ct: 27518
+# Current calibration using a 100A/50ma SCT-013-000      
+#    phase_c:
+#      current:
+#        name: ${disp_name} CT6 Amps
+#        id: ct6Amps
+#      gain_ct: 8650
+# Current calibration using a 30A/1V SCT-013-030
+    frequency:
+      name: ${disp_name} Freq B
+    line_frequency: 60Hz
+    gain_pga: 1X
+    update_interval: ${update_time}    
+  - platform: template
+    name: ${disp_name} CT1 Watts
+    id: ct1Watts
+    lambda: return id(ct1Amps).state * id(ic1Volts).state;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}         
+  - platform: template
+    name: ${disp_name} CT2 Watts
+    id: ct2Watts
+    lambda: return id(ct2Amps).state * id(ic1Volts).state;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}         
+#  - platform: template
+#    name: ${disp_name} CT3 Watts
+#    id: ct3Watts
+#    lambda: return id(ct3Amps).state * id(ic1Volts).state;
+#    accuracy_decimals: 0
+#    unit_of_measurement: W
+#    icon: "mdi:flash-circle"
+#    update_interval: ${update_time}         
+  - platform: template
+    name: ${disp_name} CT4 Watts
+    id: ct4Watts
+    lambda: return id(ct4Amps).state * id(ic2Volts).state;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}         
+  - platform: template
+    name: ${disp_name} CT5 Watts
+    id: ct5Watts
+    lambda: return id(ct5Amps).state * id(ic2Volts).state;
+    accuracy_decimals: 0
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}         
+#  - platform: template
+#    name: ${disp_name} CT6 Watts
+#    id: ct6Watts
+#    lambda: return id(ct6Amps).state * id(ic2Volts).state;
+#    accuracy_decimals: 0
+#    unit_of_measurement: W
+#    icon: "mdi:flash-circle"
+#    update_interval: ${update_time}
+  - platform: template
+    name: Garage Amps
+    id: garageAmps
+    lambda: return id(ct1Amps).state + id(ct2Amps).state;
+    accuracy_decimals: 2
+    unit_of_measurement: A
+    icon: "mdi:flash"
+    update_interval: ${update_time}         
+  - platform: template
+    name: House Amps
+    id: houseAmps
+    lambda: return id(ct4Amps).state + id(ct5Amps).state;
+    accuracy_decimals: 2
+    unit_of_measurement: A
+    icon: "mdi:flash"
+    update_interval: ${update_time}         
+  - platform: template
+    name: House Total Amps
+    id: totalAmps
+    lambda: return id(ct1Amps).state + id(ct2Amps).state + id(ct4Amps).state + id(ct5Amps).state;
+    accuracy_decimals: 2
+    unit_of_measurement: A
+    icon: "mdi:flash"
+    update_interval: ${update_time}
+  - platform: template
+    name: Garage Power
+    id: garageWatts
+    lambda: return id(garageAmps).state * id(ic1Volts).state ;
+    accuracy_decimals: 1
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}             
+  - platform: template
+    name: House Power
+    id: houseWatts
+    lambda: return id(houseAmps).state * id(ic2Volts).state ;
+    accuracy_decimals: 1
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}             
+  - platform: template
+    name: House Total Power
+    id: totalWatts
+    lambda: return id(totalAmps).state * id(ic2Volts).state ;
+    accuracy_decimals: 1
+    unit_of_measurement: W
+    icon: "mdi:flash-circle"
+    update_interval: ${update_time}             
+  - platform: total_daily_energy
+    name: House Total Energy
+    power_id: totalWatts
+    filters:
+      - multiply: 0.001
+    unit_of_measurement: kWh
+    
+switch:
+  - platform: restart
+    name: ${disp_name} Restart
+
+time:
+  - platform: sntp
+    id: sntp_time
+    servers:
+      - 192.168.32.157
+    

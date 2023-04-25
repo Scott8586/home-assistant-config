@@ -1,0 +1,12 @@
+# car home state
+id: 'carhome'
+alias: 'Z: Car Home'
+trigger:
+  platform: state
+  entity_id: device_tracker.audi_a6_ibeacon_tracker, device_tracker.audi_q7_ibeacon_tracker, device_tracker.toyota_rav4_ibeacon_tracker
+  to: 'home'
+action:
+  service: !secret telegram_notify
+  data_template:
+    message: "C: {{ trigger.to_state.name }} is {{ trigger.to_state.state }}"
+

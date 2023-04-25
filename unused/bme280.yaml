@@ -1,0 +1,35 @@
+# camera:             
+#   - platform: mjpeg                         
+#     mjpeg_url: http://192.168.32.146:8081/                        
+# #    username: user                     
+# #    password: user
+#     verify_ssl: false       
+#   - platform: generic               
+#     still_image_url: http://192.168.32.246/snap.jpeg                           
+#     stream_source: rtsp://ubnt:ubnt@192.168.32.246:554/s0                      
+#     username: ubnt                                                             
+#     password: ubnt                                                          
+#     verify_ssl: false                                                       
+
+  # Hiletgo bme280 v3.3                              
+  # VCC -> 3.3V                                                             
+  # GND -> GND                       
+  # SCL -> SCL (pin 3)                
+  # SDA -> SDA (pin 2)               
+  # SDO -> GND (or 3.3V - this would change I2C address to 0X77)
+#   - platform: bme280                                          
+#     name: Ambient                                                 
+#     i2c_address: 0x76                                         
+#     operation_mode: 2  # forced mode                          
+#     time_standby: 5                                           
+#     oversampling_temperature: 4                               
+#     oversampling_pressure: 4                                                   
+#     oversampling_humidity: 4                                                   
+#     #delta_temperature: -0.5                                                   
+#     delta_temperature: 0.25                                                 
+#     monitored_conditions:                                                   
+#       - temperature                                                        
+#       - humidity                                                           
+#       - pressure                                                  
+#     scan_interval: 40                                         
+

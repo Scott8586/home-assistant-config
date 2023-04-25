@@ -1,0 +1,12 @@
+ - entities:                               
+      - entity: sensor.netgear_lte_connection_text
+      - entity: sensor.netgear_lte_current_band
+      - entity: sensor.netgear_lte_radio_quality   
+      - entity: sensor.netgear_lte_tx_level
+      - entity: sensor.netgear_lte_rx_level               
+      - entity: sensor.netgear_lte_usage  
+      - entity: sensor.netgear_lte_usage_gb
+      - automation.relink_lte_modem_connection               
+    title: LB1120 LTE Modem       
+    type: entities                                                      
+

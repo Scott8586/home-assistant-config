@@ -1,0 +1,12 @@
+# car away state
+id: 'caraway'
+alias: 'Z: Car Away'
+trigger:
+  platform: state
+  entity_id: device_tracker.audi_a6_ibeacon_tracker, device_tracker.audi_q7_ibeacon_tracker, device_tracker.toyota_rav4_ibeacon_tracker
+  to: 'not_home'
+action:
+  service: !secret telegram_notify
+  data_template:
+    message: "C: {{ trigger.to_state.name }} is Away"
+

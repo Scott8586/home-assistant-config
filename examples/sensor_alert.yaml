@@ -1,0 +1,48 @@
+#System Status Alerts
+
+  - alias: 'Telegram Check Sensor Alert'
+    trigger:
+      # Low Battery Alerts
+      # Binary Sensor Alerts (on = alarm)
+      - entity_id: 
+          # Acurite Temp & Humidity Sensors
+          - binary_sensor.outside_front_sensor_battery_low
+          - binary_sensor.outside_rear_sensor_battery_low
+          - binary_sensor.shed_driveway_sensor_battery_low
+          - binary_sensor.shed_backyard_sensor_battery_low
+          - binary_sensor.attic_sensor_battery_low
+        platform: state
+        from: 'off'
+        to: 'on'
+        # Reduce flapping
+        for:
+          minutes: 15
+      # Low Battery Alerts
+      - platform: numeric_state
+        entity_id:
+          # Zigbee
+          - sensor.washer_vibration_battery_level
+          - sensor.dryer_vibration_battery_level
+          # Z-Wave
+          - sensor.dining_room_gate_sensor_battery_level
+        below: 33
+        # Reduce flapping
+        for:
+          minutes: 15
+      # Monitor sensor age - not reporting in
+      - platform: numeric_state
+        entity_id:
+          # Acurite Temp & Humidity Sensors Age Expired
+          - sensor.outside_front_sensor_age
+          - sensor.outside_rear_sensor_age
+          - sensor.shed_driveway_sensor_age
+          - sensor.shed_backyard_sensor_age
+          - sensor.attic_sensor_age
+        # Seconds for timeout
+        above: 1800
+    action:
+      service: notify.telegram_my_user
+      data_template:
+        message: |
+          Warning - Check Sensor:
+          {{ trigger.to_state.attributes.friendly_name }}:

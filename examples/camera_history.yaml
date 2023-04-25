@@ -1,0 +1,37 @@
+sensor:
+  - platform: history_stats
+    name: Front Door Motion Events
+    entity_id: binary_sensor.unifiprotect_motion_front_door
+    state: 'on'
+    type: count
+    start: '{{ now().replace(hour=0, minute=0, second=0) }}'
+    end: '{{ now() }}'
+
+animate: true
+color_thresholds:
+  - color: '#2ECC71'
+    value: 0
+  - color: '#F1C40F'
+    value: 10
+  - color: '#F39C12'
+    value: 20
+  - color: '#E67E22'
+    value: 50
+  - color: '#D35400'
+    value: 100
+entities:
+  - entity: sensor.front_door_motion_events
+group_by: date
+hours_to_show: 168
+icon: 'mdi:cctv'
+show:
+  fill: fade
+  graph: bar
+  icon: true
+  state: true
+type: 'custom:mini-graph-card'
+
+type: entities
+title: Camera Motion Events
+entities:
+  - entity: sensor.front_door_motion_events

@@ -1,0 +1,11 @@
+## Imitate available variables: ##}
+{% set ns = namespace(namelist=[]) %}
+
+{% set sensor_list = states.device_tracker | selectattr('state', 'eq', 'home')| list %}
+{% for sensor in sensor_list %}
+  {% set ns.namelist = [sensor.name] + ns.namelist %}
+{%endfor%}
+
+{{ns.namelist | join('\n') }}
+
+

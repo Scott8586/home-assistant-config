@@ -8,10 +8,13 @@ homeassistant:
   elevation: 15
   # metric for Metric, imperial for Imperial
   unit_system: imperial
+  # Country
+  country: US
   # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
   time_zone: America/Los_Angeles
   # Currency:
   currency: USD
+  internal_url: "https://192.168.32.161:8123"
   # Customization file
   customize: !include customize.yaml
   customize_glob: !include customize_glob.yaml
@@ -51,7 +54,7 @@ influxdb:
   ssl: false
   host: 192.168.32.61
   port: 8086
-  token: raven_tworoads_token
+  token: 72f938dc9fb7c3323094faf2fc1b4e42a60e871e1327709ade4240a6495bfffb
   organization: tworoads.net
   bucket: homeassistant_core
 
@@ -89,19 +92,12 @@ device_tracker:
 logger:
   default: info
   logs:
-    homeassistant.components.command_line.switch: warning
     homeassistant.components.automation: warning
     #homeassistant.components.venstar: debug
     #homeassistant.config: debug
-    # homeassistant.components.telegram_bot: debug
-    # aiounifi: debug
-    # homeassistant.components.unifi: debug
-
-#climate:
-#  - platform: venstar
-#   host: !secret venstar_main_host
-#   ssl: false
-#   humidifier: false
+    #homeassistant.components.telegram_bot: debug
+    #aiounifi: debug
+    #homeassistant.components.unifi: debug
 
 envisalink:
   host: !secret envisalink_host
@@ -186,7 +182,6 @@ mqtt:
     - state_topic: environment/vistasea_garage/BME280_temperature
       unique_id: garage_temperature
       name: 'Garage Temperature'                                                   
-      unit_of_measurement: '..F'                                                   
     - state_topic: 'environment/vistasea_garage/BME280_humidity'                   
       unique_id: garage_humidity
       name: 'Garage Humidity'
@@ -201,7 +196,6 @@ mqtt:
     - state_topic: 'environment/vistasea_master/BME280_temperature'                
       unique_id: master_temperature
       name: 'Master Temperature'                                                   
-      unit_of_measurement: '..F'                                                   
     - state_topic: 'environment/vistasea_master/BME280_humidity'                   
       unique_id: master_humidity
       name: 'Master Humidity'                                            
@@ -213,17 +207,51 @@ mqtt:
       unique_id: master_sealevel_pressure
       name: 'Master Sealevel Pressure'                                   
       unit_of_measurement: 'hPa'                                         
-
+    - name: "Zigbee2MQTT Bridge Status"
+      unique_id: zigbee2mqtt_bridge_status
+      state_topic: "zigbee2mqtt/bridge/state"
+      icon: mdi:clock-outline
+    - name: "Zigbee2MQTT Verion"
+      unique_id: zigbee2mqtt_version
+      icon: mdi:numeric-1-box-multiple-outline
+      state_topic: "zigbee2mqtt/bridge/info"
+      value_template: "{{ value_json.version }}"
+    - name: "Zigbee Channel"
+      unique_id: zigbee_channel
+      state_topic: "zigbee2mqtt/bridge/info"
+      icon: mdi:numeric
+      value_template: "{{ value_json.network.channel }}"
+    - name: "Zigbee2MQTT Device Count"
+      unique_id: zigbee2mqtt_device_count
+      icon: mdi:numeric
+      state_topic: "zigbee2mqtt/bridge/info"
+      value_template: "{{ value_json.config.devices | count }}"
+    - name: "Zigbee2MQTT Defined Groups"
+      unique_id: zigbee2mqtt_defined_groups
+      icon: mdi:numeric
+      state_topic: "zigbee2mqtt/bridge/info"
+      value_template: "{{ value_json.config.groups | count }}"
 
 # Sensors
 sensor:
-  - platform: helium
-    hotspots:
-      - 112YavLSSEvDt1HpmABL5rPGRhNXD3ki2gttukjpbLqhjWBgHtiG
+#  - platform: helium
+#    hotspots:
+#      - 112YavLSSEvDt1HpmABL5rPGRhNXD3ki2gttukjpbLqhjWBgHtiG
   - platform: gpsd
     name: Vistasea GPS
     host: 192.168.32.157
     scan_interval: 60
+  - platform: rest
+    # All of these seem to use the same IP
+    resource: http://192.168.12.1/TMI/v1/gateway?get=all
+    scan_interval: 60
+    method: GET
+    name: tmhi_radio_status
+    json_attributes:
+      - signal
+      - device
+      - time
+    value_template: "{{ value_json.device.isEnabled }}"
 #  - platform: mqtt
 #    name: bme280 Garage
 #    state_topic: "environment/vistasea_garage/SENSOR"
@@ -301,37 +329,37 @@ sensor:
     accept_errors: true
     value_template: "{{ value }}"
     unit_of_measurement: " °C"
-  - platform: snmp
-    host: 192.168.30.1
-    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.2.101.1
-    name: Mofi4500 LTE Band
-    version: 2c
-    scan_interval: 23
-    accept_errors: true
-    value_template: "{{ value }}"
-  - platform: snmp
-    host: 192.168.30.1
-    version: 2c
-    name: Mofi4500 LTE RSRQ
-    unit_of_measurement: 'dB'
-    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.4.101.1
-    accept_errors: true
-    scan_interval: 27
-    value_template: '{{value | float}}'
-  - platform: snmp
-    host: 192.168.30.1
-    version: 2c
-    name: Mofi4500 LTE RSRP
-    unit_of_measurement: 'dB'
-    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.5.101.1
-    accept_errors: true
-    scan_interval: 27
-    value_template: '{{value | float}}'
+#  - platform: snmp
+#    host: 192.168.30.1
+#    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.2.101.1
+#    name: Mofi4500 LTE Band
+#    version: 2c
+#    scan_interval: 23
+#    accept_errors: true
+#    value_template: "{{ value }}"
+#  - platform: snmp
+#    host: 192.168.30.1
+#    version: 2c
+#    name: Mofi4500 LTE RSRQ
+#    unit_of_measurement: 'dB'
+#    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.4.101.1
+#    accept_errors: true
+#    scan_interval: 27
+#    value_template: '{{value | float}}'
+#  - platform: snmp
+#    host: 192.168.30.1
+#    version: 2c
+#    name: Mofi4500 LTE RSRP
+#    unit_of_measurement: 'dB'
+#    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.5.101.1
+#    accept_errors: true
+#    scan_interval: 27
+#    value_template: '{{value | float}}'
   - platform: snmp
 #    host: 192.168.30.1
     host: 192.168.32.254
     version: 2c
-    name: Mofi4500 LTE Usage
+    name: TMHI 5G Usage
     scan_interval: 23
     unit_of_measurement: 'MiB'
 #    baseoid: 1.3.6.1.4.1.88888.1.1.16.1.1.7.101.1
@@ -375,8 +403,8 @@ sensor:
 #    sampling_size: 86400
 #    max_age: 24:00:00
   - platform: statistics
-    name: mofi4500_lte_statistics
-    entity_id: sensor.mofi4500_lte_usage
+    name: tmhi_5g_statistics
+    entity_id: sensor.tmhi_5g_usage
     state_characteristic: change
     sampling_size: 28800
     max_age:
@@ -414,15 +442,6 @@ sensor:
     unit_prefix: k              
     unit_time: h                                                                                
     round: 2                      
-
-switch:
-  - platform: command_line
-    switches:
-      vistasea_pi_hole:
-        command_on: !secret vistasea_pihole_enable 
-        command_off: !secret vistasea_pihole_disable
-        command_state: !secret vistasea_pihole_status
-        value_template: "{{ value_json.status == 'enabled' }}"
 
 utility_meter:                                                                   
   daily_energy:                            

@@ -77,6 +77,25 @@ sensor:
     unique_id: toyota_rav4_distance
     state: "{{ state_attr('sensor.toyota_rav4_ibeacon_room_presence', 'distance') }}"
     unit_of_measurement: 'm'             
+  - name: "TMHI 5G SINR"
+    unique_id: tmhi_5g_sinr
+    unit_of_measurement: "dbm"
+    icon: mdi:signal
+    state: "{{ state_attr('sensor.tmhi_radio_status', 'signal') ['5g'] ['sinr']  }}"
+  - name: "TMHI 5G RSRP"
+    unique_id: tmhi_5g_rsrp
+    unit_of_measurement: "dbm"
+    icon: mdi:signal
+    state: "{{ state_attr('sensor.tmhi_radio_status', 'signal') ['5g'] ['rsrp']  }}"
+  - name: "TMHI 5G RSSI"
+    unique_id: tmhi_5g_rssi
+    unit_of_measurement: "dbm"
+    icon: mdi:signal
+    state: "{{ state_attr('sensor.tmhi_radio_status', 'signal') ['5g'] ['rssi']  }}"
+  - name: "TMHI 5G Band"
+    unique_id: tmhi_5g_band
+    icon: mdi:signal-5g
+    state: "{{ state_attr('sensor.tmhi_radio_status', 'signal') ['5g'] ['bands'] [0] }}"
   - name: WeeWx Weather Update
     unique_id: weewx_weather_update
     state: "{{ states.sensor.weewx_weather.attributes['time'] }}"
@@ -139,9 +158,9 @@ sensor:
     unique_id: weewx_solar_altitude
     unit_of_measurement: '°'
     state: "{{ states.sensor.weewx_weather.attributes.almanac.sun['altitude'] }}"
-  - name: 'Mofi4500 LTE Usage GB'
+  - name: 'TMHI 5G Usage GB'
     unit_of_measurement: 'GiB'                                                                                                                                          
-    state: "{{ ( states('sensor.mofi4500_lte_usage') | float(default=0) / 1024) | round(2) }}"                       
+    state: "{{ ( states('sensor.tmhi_5g_usage') | float(default=0) / 1024) | round(2) }}"                       
   - name: "Last Boot Date Time"                                                                                     
     unique_id: last_boot_date_time                                                                                                                     
     state: "{{ states.sensor.last_boot.state.split('T')[0] }}"                                                       
@@ -160,6 +179,11 @@ sensor:
     unique_id: garage_chiller_sensor_age
     state: "{{ (states.sensor.time.last_changed - states.sensor.garage_chiller_temperature.last_changed).total_seconds() | round(0) }}"
     unit_of_measurement: "Seconds"
+  - name: Pump Room Sensor Age
+    unique_id: pump_room_sensor_age
+    state: "{{ (states.sensor.time.last_changed - states.sensor.pump_room_temperature.last_changed).total_seconds() | round(0) }}"
+    unit_of_measurement: "Seconds"
   - name: Massive Chambray Buffalo Update
     unique_id: massive_chambray_buffalo_update
-    state: "{{ (state_attr('sensor.massive_chambray_buffalo', 'block') | int(0)) - (state_attr('sensor.massive_chambray_buffalo', 'last_poc_challenge') | int(0)) }}"
+    state: "{{ (state_attr('sensor.massive_chambray_buffalo', 'block') | int(default=0)) - (state_attr('sensor.massive_chambray_buffalo', 'last_poc_challenge') | int(default=0)) | int(default=0) }}"
+    unit_of_measurement: "blocks"

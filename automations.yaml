@@ -1,0 +1,19 @@
+- id: '1668218360351'
+  alias: Testing Aqara Wireless Switch
+  description: ''
+  use_blueprint:
+    path: trevorrobinson/zigbee2mqtt_aqara_wireless_switch.yaml
+    input:
+      switch: sensor.aqara_button1_action
+      press_single:
+      - service: notify.telegram_vistasea
+        data:
+          message: Single Button Press
+      press_double:
+      - service: notify.telegram_vistasea
+        data:
+          message: Double button Press
+      press_hold:
+      - service: notify.telegram_vistasea
+        data:
+          message: Button Hold

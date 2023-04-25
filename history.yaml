@@ -1,4 +1,3 @@
-use_include_order: true
 include:
   entities:
     - person.scott
@@ -10,4 +9,4 @@ include:
     - sensor.processor_use
     - sensor.memory_use_percent
     - sensor.load_1m
-    - sensor.netgear_lte_usage
+    - sensor.tmhi_lte_usage
